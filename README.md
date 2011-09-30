@@ -24,7 +24,6 @@ Getting Started
 1. To get a copy of the source code:
 
 		git clone http://github.com/QuestSoftwareTCD/OracleSQOOPconnector.git
-	
 
 2. To compile and generate jar archive:
 
@@ -46,4 +45,4 @@ Using Eclipse
 
 		import -Dsqoop.connection.factories=com.quest.oraoop.OraOopManagerFactory --connect jdbc:oracle:thin:@//hostname:port:service --username username --password password --table oracle_table --target-dir target_dir
 
-This will run Sqoop with the default configuration - you can set the SQOOP\_CONF\_DIR environment variable if needed. It will pick up the oraoop-site-template.xml and oraoop-site.xml configuration files by default.
+This will run Sqoop with the default configuration - you can set the `SQOOP_CONF_DIR` environment variable if needed. It will pick up the oraoop-site-template.xml and oraoop-site.xml configuration files by default.

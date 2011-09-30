@@ -23,19 +23,20 @@ Getting Started
 
 1. To get a copy of the source code:
 
-	git clone http://github.com/QuestSoftwareTCD/OracleSQOOPconnector.git
+		git clone http://github.com/QuestSoftwareTCD/OracleSQOOPconnector.git
+	
 
 2. To compile and generate jar archive:
 
-	cd OracleSQOOPConnector
-	mvn package
+		cd OracleSQOOPConnector
+		mvn package
 
 Using Eclipse
 -------------
 
 1. Generate the Eclipse project with the following:
 
-	mvn eclipse:eclipse
+		mvn eclipse:eclipse
 
 2. Import the project into the Eclipse workspace.
 3. Create a new Run Configuration for the project.
@@ -43,6 +44,6 @@ Using Eclipse
 5. Set the working directory - by default data will be created in the working directory.
 6. You can now pass program arguments as normal, for example:
 
-	import -Dsqoop.connection.factories=com.quest.oraoop.OraOopManagerFactory --connect jdbc:oracle:thin:@//hostname:port:service --username username --password password --table oracle\_table --target-dir target\_dir
+		import -Dsqoop.connection.factories=com.quest.oraoop.OraOopManagerFactory --connect jdbc:oracle:thin:@//hostname:port:service --username username --password password --table oracle_table --target-dir target_dir
 
 This will run Sqoop with the default configuration - you can set the SQOOP\_CONF\_DIR environment variable if needed. It will pick up the oraoop-site-template.xml and oraoop-site.xml configuration files by default.

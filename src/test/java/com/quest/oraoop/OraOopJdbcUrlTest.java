@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import com.quest.oraoop.OraOopUtilities.JdbcOracleThinConnectionParsingError;
 
-public class OraOopJdbcUrlTest {
+public class OraOopJdbcUrlTest extends OraOopTestCase {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {

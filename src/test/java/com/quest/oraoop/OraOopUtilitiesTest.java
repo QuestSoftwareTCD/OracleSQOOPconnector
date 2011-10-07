@@ -20,14 +20,13 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 
 import com.quest.oraoop.OraOopUtilities;
 
-public class OraOopUtilitiesTest extends TestCase {
+public class OraOopUtilitiesTest extends OraOopTestCase {
 
 //	@Test
 //	public void testGetCurrentMethodName() {
@@ -38,11 +37,6 @@ public class OraOopUtilitiesTest extends TestCase {
 //	public void testDecodeOracleTableName() {
 //		fail("Not yet implemented");
 //	}
-	
-    static {
-    	// To load the defaults from the template file
-        Configuration.addDefaultResource(OraOopConstants.ORAOOP_SITE_TEMPLATE_FILENAME);
-    }
 
 	@Test
 	public void testdecodeOracleTableName() {

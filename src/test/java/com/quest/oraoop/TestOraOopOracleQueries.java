@@ -16,22 +16,29 @@
 
 package com.quest.oraoop;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import org.junit.Test;
 
-public class TestOracleTable extends OraOopTestCase {
+public class TestOraOopOracleQueries extends OraOopTestCase {
 
 	@Test
-	public void testToString() {
-		OracleTable table = new OracleTable("ORAOOP","TEST_TABLE");
-		Assert.assertEquals("ORAOOP.TEST_TABLE", table.toString());
-		
-		table = new OracleTable("","TEST_TABLE2");
-		Assert.assertEquals("TEST_TABLE2",table.toString());
-		
-		table = new OracleTable("TEST_TABLE3");
-		Assert.assertEquals("TEST_TABLE3",table.toString());
+	public void testGetCurrentSchema() throws Exception {
+		Connection conn = getTestEnvConnection();
+		try {
+			String schema = OraOopOracleQueries.getCurrentSchema(conn);
+			Assert.assertEquals(getTestEnvProperty("oracle_username").toUpperCase(), schema.toUpperCase());
+			
+			PreparedStatement stmt = conn.prepareStatement("ALTER SESSION SET CURRENT_SCHEMA=SYS");
+			stmt.execute();
+			
+			schema = OraOopOracleQueries.getCurrentSchema(conn);
+			Assert.assertEquals("SYS", schema);
+		} finally {
+			conn.close();
+		}
 	}
 
 }

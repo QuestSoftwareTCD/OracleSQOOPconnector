@@ -31,7 +31,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class ListRandomizerTest {
+public class ListRandomizerTest extends OraOopTestCase {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -100,6 +100,7 @@ public class ListRandomizerTest {
 		
 		double expectPercentageOfTimesListShouldBeInOrder = 100.0 * combinationFactor;
 		int actualNumberOfTimesListWasInOrder = 0;
+		@SuppressWarnings("unused")
 		int actualNumberOfTimesListWasOutOfOrder = 0;
 		
 		for(int idxSample = 1; idxSample < NUMBER_OF_SAMPLES; idxSample++) {

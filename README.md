@@ -28,7 +28,14 @@ Getting Started
 2. To compile and generate jar archive:
 
 		cd OracleSQOOPConnector
-		mvn package
+		mvn package -DskipTests
+
+3. To compile and generate jar archive including running tests:
+
+	* Modify `src/test/resources/oraoop-test-env.properties` to suit your environment. The user should have all the required privileges as documented in the user guide.
+	* Run maven without skipping the tests:
+	
+			mvn package
 
 Using Eclipse
 -------------

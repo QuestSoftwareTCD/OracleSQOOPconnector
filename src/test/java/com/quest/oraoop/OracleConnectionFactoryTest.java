@@ -212,22 +212,22 @@ public class OracleConnectionFactoryTest extends OraOopTestCase {
 		try {
 		
 			// Try a session-initialization statement that creates a table...
-			dropTable(conn, getTestEnvProperty("table_name"));
-			checkExecuteOraOopSessionInitializationStatements("create table "+getTestEnvProperty("table_name")+" (col1 varchar2(1))");
-			if(!doesTableExist(conn, getTestEnvProperty("table_name")))
-				Assert.fail("The session-initialization statement to create the table "+getTestEnvProperty("table_name")+" did not work.");
+			dropTable(conn, getTestEnvProperty("systemtest_table_name"));
+			checkExecuteOraOopSessionInitializationStatements("create table "+getTestEnvProperty("systemtest_table_name")+" (col1 varchar2(1))");
+			if(!doesTableExist(conn, getTestEnvProperty("systemtest_table_name")))
+				Assert.fail("The session-initialization statement to create the table "+getTestEnvProperty("systemtest_table_name")+" did not work.");
 			
 			// Try a sequence of a few statements...
-			dropTable(conn, getTestEnvProperty("table_name"));
-			checkExecuteOraOopSessionInitializationStatements("create table "+getTestEnvProperty("table_name")+" (col1 number);insert into "+getTestEnvProperty("table_name")+" values (1) ; --update "+getTestEnvProperty("table_name")+" set col1 = col1 + 1; update "+getTestEnvProperty("table_name")+" set col1 = col1 + 1; commit ;;");
+			dropTable(conn, getTestEnvProperty("systemtest_table_name"));
+			checkExecuteOraOopSessionInitializationStatements("create table "+getTestEnvProperty("systemtest_table_name")+" (col1 number);insert into "+getTestEnvProperty("systemtest_table_name")+" values (1) ; --update "+getTestEnvProperty("systemtest_table_name")+" set col1 = col1 + 1; update "+getTestEnvProperty("systemtest_table_name")+" set col1 = col1 + 1; commit ;;");
 		
-			ResultSet resultSet = conn.createStatement().executeQuery("select col1 from "+getTestEnvProperty("table_name"));
+			ResultSet resultSet = conn.createStatement().executeQuery("select col1 from "+getTestEnvProperty("systemtest_table_name"));
 			resultSet.next();
 			int actualValue = resultSet.getInt("col1");
 			if(actualValue != 2)
-				Assert.fail("The table "+getTestEnvProperty("table_name")+" does not contain the data we expected.");
+				Assert.fail("The table "+getTestEnvProperty("systemtest_table_name")+" does not contain the data we expected.");
 			
-			dropTable(conn, getTestEnvProperty("table_name"));
+			dropTable(conn, getTestEnvProperty("systemtest_table_name"));
 			
 		}
 		catch(Exception ex) {

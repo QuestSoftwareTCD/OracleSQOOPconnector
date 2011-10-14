@@ -67,9 +67,7 @@ import com.quest.oraoop.systemtest.util.URIGenerator;
  */
 public class ImportTest extends OraOopTestCase {
 	
-	private String sqoopGenLibDirectory = System.getProperty("user.dir") + "/target/tmp/lib";
-	private String sqoopGenSrcDirectory = System.getProperty("user.dir") + "/target/tmp/src";
-	private String sqoopTargetDirectory = "target/tmp/" + getTestEnvProperty("table_name");
+	private String sqoopTargetDirectory = super.sqoopTargetDirectory + getTestEnvProperty("systemtest_table_name");
 
 	/**
 	 * Generates pseudo-random test data across all supported data types in an
@@ -82,12 +80,12 @@ public class ImportTest extends OraOopTestCase {
 	@Test
 	public void importTest() throws Exception {
 		// Generate test data in oracle
-		final int numRows = Integer.valueOf(getTestEnvProperty("num_rows"));
+		final int numRows = Integer.valueOf(getTestEnvProperty("systemtest_num_rows"));
 		Connection conn = getTestEnvConnection();
 		try {
 			Statement s = conn.createStatement();
 			try {
-				s.executeUpdate("CREATE TABLE " + getTestEnvProperty("table_name")
+				s.executeUpdate("CREATE TABLE " + getTestEnvProperty("systemtest_table_name")
 						+ " (id NUMBER(10) PRIMARY KEY, bd BINARY_DOUBLE, bf BINARY_FLOAT, b BLOB, c CHAR(12), "
 						+ "cl CLOB, d DATE, f FLOAT(126), l LONG, nc NCHAR(30), ncl NCLOB, n NUMBER(9,2), "
 						+ "nvc NVARCHAR2(30), r ROWID, u URITYPE, iym INTERVAL YEAR(2) TO MONTH, "
@@ -115,7 +113,7 @@ public class ImportTest extends OraOopTestCase {
 				BytesGenerator rawg = new BytesGenerator(21, 21);
 				OraclePreparedStatement ps = (OraclePreparedStatement) conn
 						.prepareStatement("INSERT INTO "
-								+ getTestEnvProperty("table_name")
+								+ getTestEnvProperty("systemtest_table_name")
 								+ " ( id, bd, bf, b, c, cl, d, f, nc, ncl, n, nvc, r, u, iym, ids, t, tz, tltz, rawcol ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, sys.UriFactory.getUri(?), ?, ?, ?, ?, ?, ? )");
 				try {
 					for (int i = 0; i < numRows; i++) {
@@ -146,7 +144,7 @@ public class ImportTest extends OraOopTestCase {
 				}
 
 				// Can't bind > 4000 bytes of data to LONG and LOB columns in the same statement, so do LONG by itself
-				ps = (OraclePreparedStatement) conn.prepareStatement("UPDATE " + getTestEnvProperty("table_name")
+				ps = (OraclePreparedStatement) conn.prepareStatement("UPDATE " + getTestEnvProperty("systemtest_table_name")
 						+ " SET l = ? WHERE id = ?");
 				try {
 					for (int i = 0; i < numRows; i++) {
@@ -169,7 +167,7 @@ public class ImportTest extends OraOopTestCase {
 							"--password",
 							getTestEnvProperty("oracle_password"),
 							"--table",
-							getTestEnvProperty("table_name"),
+							getTestEnvProperty("systemtest_table_name"),
 							"--target-dir",
 							this.sqoopTargetDirectory,
 							"--package-name",
@@ -179,20 +177,19 @@ public class ImportTest extends OraOopTestCase {
 							"--outdir",
 							this.sqoopGenSrcDirectory
 							};
-					Configuration sqoopConf = new Configuration();
-					sqoopConf.set("sqoop.connection.factories","com.quest.oraoop.OraOopManagerFactory");
+					Configuration sqoopConf = getSqoopConf();
 					int retCode = Sqoop.runTool(sqoopArgs,sqoopConf);
 					assertEquals("Return code should be 0", 0,retCode);
 
 					// Add sqoop generated code to the classpath
 					String sqoopGenJarPath = "file://" + this.sqoopGenLibDirectory + "/"
-							+ getTestEnvProperty("table_name") + ".jar";
+							+ getTestEnvProperty("systemtest_table_name") + ".jar";
 					URLClassLoader loader = new URLClassLoader(new URL[] { new URL(sqoopGenJarPath) }, getClass()
 							.getClassLoader());
 					Thread.currentThread().setContextClassLoader(loader);
 
 					// Read test data from hadoop
-					Configuration hadoopConf = new Configuration();
+					Configuration hadoopConf = getSqoopConf();
 					FileSystem hdfs = FileSystem.get(hadoopConf);
 					Path path = new Path(this.sqoopTargetDirectory);
 					FileStatus[] statuses = hdfs.listStatus(path);
@@ -207,7 +204,7 @@ public class ImportTest extends OraOopTestCase {
 									.newInstance();
 							ps = (OraclePreparedStatement) conn
 									.prepareStatement("SELECT bd, bf, b, c, cl, d, f, l, nc, ncl, nvc, r, u, iym, ids, t, tz, tltz, rawcol FROM "
-											+ getTestEnvProperty("table_name") + " WHERE id = ?");
+											+ getTestEnvProperty("systemtest_table_name") + " WHERE id = ?");
 							while (reader.next(key, value)) {
 								// Compare test data from hadoop with data in oracle
 								Map<String, Object> fields = value.getFieldMap();
@@ -275,7 +272,7 @@ public class ImportTest extends OraOopTestCase {
 							}
 						}
 					}
-					ResultSet rs = s.executeQuery("SELECT COUNT(*) FROM " + getTestEnvProperty("table_name"));
+					ResultSet rs = s.executeQuery("SELECT COUNT(*) FROM " + getTestEnvProperty("systemtest_table_name"));
 					rs.next();
 					int oracleRecordCount = rs.getInt(1);
 					assertEquals("Number of records in Hadoop does not match number of records in oracle",
@@ -283,7 +280,7 @@ public class ImportTest extends OraOopTestCase {
 					rs.close();
 				} finally {
 					// Delete test data from hadoop
-					Configuration hadoopConf = new Configuration();
+					Configuration hadoopConf = getSqoopConf();
 					FileSystem hdfs = FileSystem.get(hadoopConf);
 					hdfs.delete(new Path(this.sqoopTargetDirectory), true);
 					hdfs.delete(new Path(this.sqoopGenSrcDirectory), true);
@@ -291,7 +288,7 @@ public class ImportTest extends OraOopTestCase {
 				}
 			} finally {
 				// Delete test data from oracle
-				s.executeUpdate("DROP TABLE " + getTestEnvProperty("table_name"));
+				s.executeUpdate("DROP TABLE " + getTestEnvProperty("systemtest_table_name"));
 				s.close();
 			}
 			

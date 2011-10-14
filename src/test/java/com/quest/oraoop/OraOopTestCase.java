@@ -28,7 +28,13 @@ import oracle.jdbc.OracleConnection;
 
 public abstract class OraOopTestCase {
 	
-	private ClassLoader classLoader;
+	protected static OraOopLog LOG = OraOopLogFactory.getLog(OraOopTestCase.class.getName());
+	
+	protected final String sqoopGenLibDirectory = System.getProperty("user.dir") + "/target/tmp/lib";
+	protected final String sqoopGenSrcDirectory = System.getProperty("user.dir") + "/target/tmp/src";
+	protected final String sqoopTargetDirectory = "target/tmp/";
+	
+	protected ClassLoader classLoader;
 	{
 	  classLoader = Thread.currentThread().getContextClassLoader();
 	  if (classLoader == null) {
@@ -46,7 +52,6 @@ public abstract class OraOopTestCase {
 	private final Properties conf = new Properties();
 	
 	public OraOopTestCase() {
-		super();
 		URL url = classLoader.getResource(configurationFileName);
 		if (url == null) {
 			throw new RuntimeException("Could not find " + configurationFileName);
@@ -63,12 +68,18 @@ public abstract class OraOopTestCase {
 		}
 	}
 	
-	public String getTestEnvProperty(String name) {
+	protected String getTestEnvProperty(String name) {
 		return this.conf.getProperty(name);
 	}
 	
-	public OracleConnection getTestEnvConnection() throws SQLException {
+	protected OracleConnection getTestEnvConnection() throws SQLException {
 		return (OracleConnection) DriverManager.getConnection(this.getTestEnvProperty("oracle_url"),this.getTestEnvProperty("oracle_username"),this.getTestEnvProperty("oracle_password"));
+	}
+	
+	protected Configuration getSqoopConf() {
+		Configuration sqoopConf = new Configuration();
+		sqoopConf.set("sqoop.connection.factories","com.quest.oraoop.OraOopManagerFactory");
+		return sqoopConf;
 	}
 
 }

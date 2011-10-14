@@ -30,7 +30,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class OracleConnectionFactoryTest extends OraOopTestCase {
+public class ITOracleConnectionFactory extends OraOopTestCase {
 
 	public class Exposer extends OracleConnectionFactory {
 		

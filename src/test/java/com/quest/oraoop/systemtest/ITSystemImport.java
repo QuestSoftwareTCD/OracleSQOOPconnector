@@ -65,7 +65,7 @@ import com.quest.oraoop.systemtest.util.URIGenerator;
  * 
  * @author phall
  */
-public class ImportTest extends OraOopTestCase {
+public class ITSystemImport extends OraOopTestCase {
 	
 	private String sqoopTargetDirectory = super.sqoopTargetDirectory + getTestEnvProperty("systemtest_table_name");
 

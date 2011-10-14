@@ -22,7 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import org.junit.Test;
 
-public class TestOraOopOracleQueries extends OraOopTestCase {
+public class ITOraOopOracleQueries extends OraOopTestCase {
 
 	@Test
 	public void testGetCurrentSchema() throws Exception {

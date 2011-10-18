@@ -16,17 +16,18 @@
 
 package com.quest.oraoop.test;
 
+import java.net.URL;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
-
 import org.apache.commons.io.IOUtils;
-
 import com.quest.oraoop.OraOopTestCase;
 
 public abstract class OracleData {
+	
+	enum KeyType { PRIMARY, UNIQUE }
 	
 	private static ClassLoader classLoader;
 	static {
@@ -55,26 +56,56 @@ public abstract class OracleData {
 	}
 	
 	private static void createPackageSpec(Connection conn,
-											 String tableName,
-					     List<OracleDataDefinition> columnList)
+			OracleTableDefinition tableDefinition)
 					    		 throws Exception {
 		String pkgSql = IOUtils.toString(classLoader.getResource("pkg_tst_product_gen.psk").openStream());
-		pkgSql = pkgSql.replaceAll("\\$COLUMN_LIST", getColumnList(columnList));
-		pkgSql = pkgSql.replaceAll("\\$TABLE_NAME", tableName);
+		pkgSql = pkgSql.replaceAll("\\$COLUMN_LIST", getColumnList(tableDefinition.getColumnList()));
+		pkgSql = pkgSql.replaceAll("\\$TABLE_NAME", tableDefinition.getTableName());
 		PreparedStatement stmt = conn.prepareStatement(pkgSql);
 		stmt.execute();
 	}
 	
 	private static void createPackageBody(Connection conn,
-			 								 String tableName,
-		     			 List<OracleDataDefinition> columnList)
+			OracleTableDefinition tableDefinition)
 		     					 throws Exception {
 		String pkgSql = IOUtils.toString(classLoader.getResource("pkg_tst_product_gen.pbk").openStream());
-		pkgSql = pkgSql.replaceAll("\\$COLUMN_LIST", getColumnList(columnList));
-		pkgSql = pkgSql.replaceAll("\\$TABLE_NAME", tableName);
-		pkgSql = pkgSql.replaceAll("\\$DATA_EXPRESSION_LIST", getDataExpression(columnList));
+		pkgSql = pkgSql.replaceAll("\\$COLUMN_LIST", getColumnList(tableDefinition.getColumnList()));
+		pkgSql = pkgSql.replaceAll("\\$TABLE_NAME", tableDefinition.getTableName());
+		pkgSql = pkgSql.replaceAll("\\$DATA_EXPRESSION_LIST", getDataExpression(tableDefinition.getColumnList()));
 		PreparedStatement stmt = conn.prepareStatement(pkgSql);
 		stmt.execute();
+	}
+	
+	private static void createKey(Connection conn,
+			KeyType keyType,
+			OracleTableDefinition tableDefinition)
+								throws Exception {
+		List<String> columns = null;
+		switch(keyType) {
+			case PRIMARY: columns = tableDefinition.getPrimaryKeyColumns();
+				break;
+			case UNIQUE: columns = tableDefinition.getUniqueKeyColumns();
+				break;
+		}
+		if (columns != null && columns.size() > 0) {
+			StringBuilder keyColumnList = new StringBuilder();
+			String delim = "";
+			for (String column : columns) {
+				keyColumnList.append(delim).append(column);
+				delim = ",";
+			}
+			String keySql = "alter table $TABLE_NAME add constraint $TABLE_NAME_" +
+							((keyType==KeyType.PRIMARY) ? "pk primary key" : "uk unique") +
+							"($PK_COLUMN_LIST) " + 
+							"using index (create unique index $TABLE_NAME_" + 
+							((keyType==KeyType.PRIMARY) ? "pk" : "uk") +
+							" on $TABLE_NAME($PK_COLUMN_LIST) " +
+							"parallel nologging)";
+			keySql = keySql.replaceAll("\\$TABLE_NAME", tableDefinition.getTableName());
+			keySql = keySql.replaceAll("\\$PK_COLUMN_LIST", keyColumnList.toString());
+			PreparedStatement stmt = conn.prepareStatement(keySql);
+			stmt.execute();
+		}
 	}
 	
 	public static int getParallelProcesses(Connection conn) throws Exception {
@@ -97,17 +128,28 @@ public abstract class OracleData {
 	}
 	
 	public static void createTable(Connection conn,
-			String tableName,
-			List<OracleDataDefinition> columnList,
+			OracleTableDefinition tableDefinition,
 			int parallelDegree,
 			int rowsPerSlave) throws Exception {
-		createPackageSpec(conn, tableName, columnList);
-		createPackageBody(conn, tableName, columnList);
+		createPackageSpec(conn, tableDefinition);
+		createPackageBody(conn, tableDefinition);
 
-		CallableStatement procStmt = conn.prepareCall("begin pkg_odg_" + tableName + ".prc_load_table(?,?); end;");
+		CallableStatement procStmt = conn.prepareCall("begin pkg_odg_" + tableDefinition.getTableName() + ".prc_load_table(?,?); end;");
 		procStmt.setInt(1, parallelDegree);
 		procStmt.setInt(2, rowsPerSlave);
 		procStmt.execute();
+		
+		createKey(conn, KeyType.PRIMARY, tableDefinition);
+		createKey(conn, KeyType.UNIQUE, tableDefinition);
+	}
+	
+	public static void createTable(Connection conn,
+			String fileName,
+			int parallelDegree,
+			int rowsPerSlave) throws Exception {
+		URL file = classLoader.getResource(fileName);
+		OracleTableDefinition tableDefinition = new OracleTableDefinition(file);
+		createTable(conn, tableDefinition, parallelDegree, rowsPerSlave);
 	}
 
 }

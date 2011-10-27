@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 
@@ -68,8 +67,6 @@ public class OraOopManagerFactory extends ManagerFactory {
 
                 if (!isOraOopEnabled(sqoopOptions))
                     return result;
-
-                checkConnectStringFormat(connectString);
                 
                 OraOopConnManager oraOopConnManager = null;
 
@@ -987,36 +984,6 @@ public class OraOopManagerFactory extends ManagerFactory {
                                                                                   "Error:\n%s"
                                                                                  ,OraOopConstants.ORAOOP_PRODUCT_NAME
                                                                                  ,ex.toString())));
-        }
-    }
-
-    private void checkConnectStringFormat(String jdbcConnectStr) {
-
-        // Check whether the connection string is sid-based AND contains URL properties.
-        // We'll tell the user they're not going to have any luck trying to do this...
-        
-        try {
-            OraOopJdbcUrl oraOopJdbcUrl = new OraOopJdbcUrl(jdbcConnectStr);
-            OraOopUtilities.JdbcOracleThinConnection jdbcConnection = oraOopJdbcUrl.parseJdbcOracleThinConnectionString();
-            
-            if(oraOopJdbcUrl.connectionStringContainsProperties() &&
-               jdbcConnection.sid != null && 
-               !jdbcConnection.sid.isEmpty()) 
-                 throw new RuntimeException("\n\t*****************************************************************************************"+
-                                            "\n\tYou have provided a sid-based Oracle JDBC connection string that includes URL parameters."+
-                                            "\n\tUnfortunately, sid-based Oracle connection strings are not well-formed URLs, " +
-                                            "\n\tso Sqoop will not cope with this connection string." +
-                                            "\n\tHowever, service-based Oracle connection strings are well-formed URLs and " +
-                                            "\n\tcan therefore include parameters. So instead of using a connection string like this:"+
-                                            "\n\t\tjdbc:oracle:<driver-type>:@<host>:<port>:<sid>?<parameters>" +
-                                            "\n\tuse one like this:"+
-                                            "\n\t\tjdbc:oracle:<driver-type>:@<host>:<port>/<service>?<parameters>" +
-                                            "\n\t*****************************************************************************************"+
-                                            "\n");
-                
-        }
-        catch (JdbcOracleThinConnectionParsingError ex) {
-            return;
         }
     }
 }

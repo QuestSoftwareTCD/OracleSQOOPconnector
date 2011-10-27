@@ -219,47 +219,10 @@ public class OraOopJdbcUrlTest extends OraOopTestCase {
         }
         catch(IllegalArgumentException ex) { /* This is what we want to happen. */ }
         
-        // JDBC URL without parameters...
+        // JDBC URL...
         actual = new OraOopJdbcUrl("jdbc:oracle:thin:@hostname.domain:1521:dbsid").getConnectionUrl();
         Assert.assertEquals("jdbc:oracle:thin:@hostname.domain:1521:dbsid", actual);
 
-        // JDBC URL with parameters...
-        actual = new OraOopJdbcUrl("jdbc:oracle:thin:@hostname.domain:1521:dbsid?param1=loremipsum").getConnectionUrl();
-        Assert.assertEquals("jdbc:oracle:thin:@hostname.domain:1521:dbsid", actual);
-    }
-
-    @Test
-    public void testGetConnectionProperties() {
-
-        String userName = "sqoopuser";
-        String password = "sqooppass";
-        Properties actual;
-        
-        // (sid-based) JDBC URL without parameters...
-        actual = new OraOopJdbcUrl("jdbc:oracle:thin:@hostname.domain:1521:dbsid").getConnectionProperties(userName, password);
-        Assert.assertEquals(2, actual.size());
-        Assert.assertEquals(userName, actual.getProperty("user"));
-        Assert.assertEquals(password, actual.getProperty("password"));
-
-        // (sid-based) JDBC URL with parameters...
-        actual = new OraOopJdbcUrl("jdbc:oracle:thin:@hostname.domain:1521:dbsid?param1=loremipsum").getConnectionProperties(userName, password);
-        //Assert.assertEquals(3, actual.size()); Disabled test - need to review parameters DR
-        Assert.assertEquals(userName, actual.getProperty("user"));
-        Assert.assertEquals(password, actual.getProperty("password"));
-        //Assert.assertEquals("loremipsum", actual.getProperty("param1")); Disabled test - need to review parameters DR
-        
-        // (service-based) JDBC URL without parameters...
-        actual = new OraOopJdbcUrl("jdbc:oracle:thin:@hostname.domain:1521/dbservice.dbdomain").getConnectionProperties(userName, password);
-        Assert.assertEquals(2, actual.size());
-        Assert.assertEquals(userName, actual.getProperty("user"));
-        Assert.assertEquals(password, actual.getProperty("password"));
-
-        // (service-based) JDBC URL with parameters...
-        actual = new OraOopJdbcUrl("jdbc:oracle:thin:@hostname.domain:1521/dbservice.dbdomain?param1=loremipsum").getConnectionProperties(userName, password);
-        //Assert.assertEquals(3, actual.size()); Disabled test - need to review parameters DR
-        Assert.assertEquals(userName, actual.getProperty("user"));
-        Assert.assertEquals(password, actual.getProperty("password"));
-        //Assert.assertEquals("loremipsum", actual.getProperty("param1")); Disabled test - need to review parameters DR
     }
 
 }

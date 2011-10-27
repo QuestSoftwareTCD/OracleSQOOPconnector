@@ -17,34 +17,24 @@
 package com.quest.oraoop;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URLDecoder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.OutputFormat;
-
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.manager.GenericJdbcManager;
 import com.cloudera.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;
 import com.cloudera.sqoop.mapreduce.JdbcUpdateExportJob;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
-import com.cloudera.sqoop.util.JdbcUrl;
-import com.quest.oraoop.OraOopUtilities.JdbcOracleThinConnection;
-import com.quest.oraoop.OraOopUtilities.JdbcOracleThinConnectionParsingError;
 
 /*
  *	NOTES:
@@ -86,28 +76,14 @@ public class OraOopConnManager extends GenericJdbcManager {
     protected Connection makeConnection() throws SQLException {
 
         String connectStr = this.options.getConnectString(); 
-        String userName = this.options.getUsername();
+        String username = this.options.getUsername();
         String password = this.options.getPassword();
 
-        OraOopJdbcUrl oraOopJdbcUrl = new OraOopJdbcUrl(connectStr);
-        
-        String jdbcUrl = oraOopJdbcUrl.getConnectionUrl();
-        
         Connection connection = OracleConnectionFactory.createOracleJdbcConnection(this.getDriverClass()
-                                                                              ,jdbcUrl
-                                                                              ,oraOopJdbcUrl.getConnectionProperties(userName, password)
+                                                                              ,connectStr
+                                                                              ,username
+                                                                              ,password
                                                                               );
-
-        //========================================================================================================
-        // This code can be removed post Sqoop 1.3
-        // If not using Sqoop 1.3 or patch SQOOP-172 has not been applied, then parameters on the jdbc url
-        // are not supported. Therefore, we'll update the jdbc url to omit any parameters...
-        if(OraOopJdbcUrl.findGetConnectionPropertiesMethod() == null) {
-            this.options.setConnectString(jdbcUrl);
-            this.options.getConf().set("db.connect.string", jdbcUrl);
-            LOG.info(String.format("The connection string has been changed from \"%s\" to \"%s\".", connectStr, jdbcUrl));
-        }        
-        //========================================================================================================
         
         return connection;
     }
@@ -277,7 +253,6 @@ public class OraOopConnManager extends GenericJdbcManager {
         super.importTable(context);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void exportTable(ExportJobContext context) throws IOException, ExportException {
 
@@ -304,7 +279,6 @@ public class OraOopConnManager extends GenericJdbcManager {
         exportJob.runExport();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void updateTable(ExportJobContext context) throws IOException, ExportException {
 

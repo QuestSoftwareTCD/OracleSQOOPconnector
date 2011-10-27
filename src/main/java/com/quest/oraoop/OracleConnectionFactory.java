@@ -30,25 +30,24 @@ public class OracleConnectionFactory {
 
     protected static final OraOopLog LOG = OraOopLogFactory.getLog(OracleConnectionFactory.class.getName());
 
-    public static Connection createOracleJdbcConnection(String jdbcDriverClassName
-            ,String jdbcUrl
-            ,String userName
-            ,String password) 
+    public static Connection createOracleJdbcConnection(String jdbcDriverClassName,
+            String jdbcUrl,
+            String username,
+            String password) 
         throws SQLException {
-    
-        Properties props = new Properties();
-        props.put("user", userName);
-        props.put("password", password);
-        return createOracleJdbcConnection(jdbcDriverClassName, jdbcUrl, props);
+    	Properties props = null;
+        return createOracleJdbcConnection(jdbcDriverClassName, jdbcUrl, username, password, props);
     }
     
     public static Connection createOracleJdbcConnection(String jdbcDriverClassName
-                                                       ,String jdbcUrl
-                                                       ,Properties props) 
+            ,String jdbcUrl
+            ,String username
+    		,String password
+    		,Properties additionalProps)
         throws SQLException {
 
         loadJdbcDriver(jdbcDriverClassName);
-        Connection connection = createConnection(jdbcUrl, props);
+        Connection connection = createConnection(jdbcUrl, username, password, additionalProps);
 
         // Only OraOopDBRecordReader will call initializeOracleConnection(), as
         // we only need to initialize the session(s) prior to the mapper starting it's job.
@@ -72,15 +71,31 @@ public class OracleConnectionFactory {
         }
     }
 
-    private static Connection createConnection(String jdbcUrl, Properties props) throws SQLException {
+    private static Connection createConnection(String jdbcUrl,
+    		String username,
+    		String password,
+    		Properties additionalProps) throws SQLException {
+
+    	Properties props = new Properties();
+        if (username != null) {
+          props.put("user", username);
+        }
+
+        if (password != null) {
+          props.put("password", password);
+        }
+        
+        if (additionalProps != null && additionalProps.size() > 0) {
+        	props.putAll(additionalProps);
+        }
 
         try {
-                return DriverManager.getConnection(jdbcUrl, props);
+            return DriverManager.getConnection(jdbcUrl, props);
         }
         catch (SQLException ex) {
             String errorMsg = String.format("Unable to obtain a JDBC connection to the URL \"%s\" as user \"%s\": "
                                            ,jdbcUrl
-                                           ,props.getProperty("user", "[null]"));
+                                           ,(username!=null) ? username : "[null]");
             LOG.error(errorMsg, ex);
             throw ex;
         }

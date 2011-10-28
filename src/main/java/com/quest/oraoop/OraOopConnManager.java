@@ -267,6 +267,7 @@ public class OraOopConnManager extends GenericJdbcManager {
 
         context.setConnManager(this);
 
+        @SuppressWarnings("rawtypes")
         Class<? extends OutputFormat> oraOopOutputFormatClass;
         try {
             oraOopOutputFormatClass = OraOopOutputFormatInsert.class;
@@ -286,6 +287,7 @@ public class OraOopConnManager extends GenericJdbcManager {
         
       context.setConnManager(this);
         
+      @SuppressWarnings("rawtypes")
       Class<? extends OutputFormat> oraOopOutputFormatClass;
       try {
           oraOopOutputFormatClass = OraOopOutputFormatUpdate.class;

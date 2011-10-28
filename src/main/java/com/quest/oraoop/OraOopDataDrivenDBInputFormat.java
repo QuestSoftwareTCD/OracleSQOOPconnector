@@ -202,13 +202,6 @@ public class OraOopDataDrivenDBInputFormat<T extends DBWritable> extends DataDri
         return desiredNumberOfMappers;
     }
 
-    private int getTableDataObjectNumber(Connection connection, OracleTable table) throws SQLException {
-
-        int oracleDataObjectId = OraOopOracleQueries.getOracleDataObjectNumber(connection, table);
-        LOG.debug("The Oracle DataObjectId of the table being imported is : " + oracleDataObjectId);
-        return oracleDataObjectId;
-    }
-
     protected List<InputSplit> groupTableDataChunksIntoSplits(List<OraOopOracleDataChunk> dataChunks, int desiredNumberOfSplits, OraOopConstants.OraOopOracleBlockToSplitAllocationMethod blockAllocationMethod) {
 
         int numberOfDataChunks = dataChunks.size();
@@ -263,7 +256,6 @@ public class OraOopDataDrivenDBInputFormat<T extends DBWritable> extends DataDri
 
             case SEQUENTIAL: {
                 double dataChunksPerSplit = dataChunks.size() / (double) splits.size();
-                int dataChunksInThisSplit = 0;
                 int dataChunksAllocatedToSplits = 0;
 
                 int idxSplit = 0;
@@ -272,12 +264,10 @@ public class OraOopDataDrivenDBInputFormat<T extends DBWritable> extends DataDri
                     OraOopDBInputSplit split = (OraOopDBInputSplit) splits.get(idxSplit);
                     split.getDataChunks().add(dataChunk);
 
-                    dataChunksInThisSplit++;
                     dataChunksAllocatedToSplits++;
 
                     if (dataChunksAllocatedToSplits >= (dataChunksPerSplit * (idxSplit + 1)) && idxSplit < splits.size()) {
                         idxSplit++;
-                        dataChunksInThisSplit = 0;
                     }
                 }
                 break;

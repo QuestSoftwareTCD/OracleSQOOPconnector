@@ -502,7 +502,6 @@ public class OraOopUtilities {
     public static Object startSessionSnapshot(Connection connection) {
 
         Object result = null;
-        Exception exception = null;
         try {
 
             Class<?> oraOopOraStatsClass = Class.forName("quest.com.oraOop.oracleStats.OraOopOraStats");
@@ -523,11 +522,6 @@ public class OraOopUtilities {
             throw new RuntimeException(ex);
         }
 
-        if (exception != null)
-            LOG.warn(String.format("Unable to start collecting session statistics in %s.\n\tError: %s"
-                                  ,OraOopUtilities.getCurrentMethodName()
-                                  ,getFullExceptionMessage(exception)));
-
         return result;
     }
 
@@ -538,7 +532,6 @@ public class OraOopUtilities {
         if (oraOopOraStats == null)
             return result;
 
-        Exception exception = null;
         try {
 
             Class<?> oraOopOraStatsClass = Class.forName("quest.com.oraOop.oracleStats.OraOopOraStats");
@@ -563,11 +556,6 @@ public class OraOopUtilities {
         catch (IllegalAccessException ex) {
             throw new RuntimeException(ex);
         }
-
-        if (exception != null)
-            LOG.warn(String.format("Unable to stop collection  of session statistics in %s.\n\tError: %s"
-                                  ,OraOopUtilities.getCurrentMethodName()
-                                  ,getFullExceptionMessage(exception)));
 
         return result;
     }

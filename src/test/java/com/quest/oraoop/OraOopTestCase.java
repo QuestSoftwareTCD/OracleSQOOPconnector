@@ -48,13 +48,18 @@ public abstract class OraOopTestCase {
     }
 	
 	private final String configurationFileName = "oraoop-test-env.properties";
+	private final String configurationDefaultFileName = "oraoop-test-env.properties.default";
 	
 	private final Properties conf = new Properties();
 	
 	public OraOopTestCase() {
-		URL url = classLoader.getResource(configurationFileName);
+		URL url = null;
+		url = classLoader.getResource(configurationFileName);
 		if (url == null) {
-			throw new RuntimeException("Could not find " + configurationFileName);
+			url = classLoader.getResource(configurationDefaultFileName);
+			if (url == null) {
+				throw new RuntimeException("Could not find " + configurationFileName);
+			}
 		}
 		try {
 			conf.load(url.openStream());

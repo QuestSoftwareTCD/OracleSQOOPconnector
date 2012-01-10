@@ -164,8 +164,6 @@ public class OraOopManagerFactory extends ManagerFactory {
                     for (OraOopLogMessage message : messagesToDisplayAfterWelcome)
                         message.log(LOG);
 
-                    registerOraOopSerializationFactory(sqoopOptions);
-
                     // By the time we get into getSplits(), the number of mappers
                     // stored in the config can be either 4 or 1 - so it seems
                     // a bit unreliable. We'll use our own property name to ensure
@@ -435,24 +433,6 @@ public class OraOopManagerFactory extends ManagerFactory {
         Configuration conf = jobData.getSqoopOptions().getConf();
         String mapperJdbcUrlPropertyName = OraOopUtilities.getMapperJdbcUrlPropertyName(mapperIdx, conf);
         conf.set(mapperJdbcUrlPropertyName, jdbcUrl);
-    }
-
-    private void registerOraOopSerializationFactory(SqoopOptions sqoopOptions) {
-
-        // There is a configuration property of "io.serializations" containing the
-        // names of the class-factories that should be polled to see whether they
-        // can serialize/deserialize splits.
-        // Add the OraOopSerializationFactory class name, is this knows how to
-        // serialize/deserialize splits of type OraOopDBInputSplit...
-
-        final String SERIALIZATION_FACTORIES = "io.serializations";
-        String serializationFactories = sqoopOptions.getConf().get(SERIALIZATION_FACTORIES);
-
-        String oraOopSerializationFactory = com.quest.oraoop.OraOopSerializationFactory.class.getName();
-        if (serializationFactories == null)
-            sqoopOptions.getConf().set(SERIALIZATION_FACTORIES, oraOopSerializationFactory);
-        else if (!serializationFactories.contains(oraOopSerializationFactory))
-            sqoopOptions.getConf().set(SERIALIZATION_FACTORIES, oraOopSerializationFactory + "," + serializationFactories);
     }
 
     private boolean isOraOopEnabled(SqoopOptions sqoopOptions) {

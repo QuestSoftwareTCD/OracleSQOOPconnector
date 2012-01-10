@@ -101,7 +101,9 @@ class OraOopDBInputSplit extends DBInputFormat.DBInputSplit {
         return null;
     }
 
-    protected void serialize(DataOutput output) throws IOException {
+    @Override
+    /** {@inheritDoc} */
+    public void write(DataOutput output) throws IOException {
 
         output.writeInt(splitId);
 
@@ -114,7 +116,9 @@ class OraOopDBInputSplit extends DBInputFormat.DBInputSplit {
         }
     }
 
-    protected void deserialize(DataInput input) throws IOException {
+    @Override
+    /** {@inheritDoc} */
+    public void readFields(DataInput input) throws IOException {
 
         this.splitId = input.readInt();
 

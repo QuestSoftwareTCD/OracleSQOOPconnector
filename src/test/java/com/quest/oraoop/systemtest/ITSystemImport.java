@@ -40,8 +40,6 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.junit.Test;
-
-import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.lib.BlobRef;
 import com.cloudera.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.lib.SqoopRecord;
@@ -66,8 +64,6 @@ import com.quest.oraoop.systemtest.util.URIGenerator;
  * @author phall
  */
 public class ITSystemImport extends OraOopTestCase {
-	
-	private String sqoopTargetDirectory = super.sqoopTargetDirectory + getTestEnvProperty("systemtest_table_name");
 
 	/**
 	 * Generates pseudo-random test data across all supported data types in an
@@ -80,6 +76,7 @@ public class ITSystemImport extends OraOopTestCase {
 	@Test
 	public void importTest() throws Exception {
 		// Generate test data in oracle
+		setSqoopTargetDirectory(getSqoopTargetDirectory() + getTestEnvProperty("systemtest_table_name"));
 		final int numRows = Integer.valueOf(getTestEnvProperty("systemtest_num_rows"));
 		Connection conn = getTestEnvConnection();
 		try {
@@ -158,31 +155,12 @@ public class ITSystemImport extends OraOopTestCase {
 
 				try {
 					// Import test data into hadoop
-					String[] sqoopArgs = {"import",
-							"--as-sequencefile",
-							"--connect",
-							getTestEnvProperty("oracle_url"),
-							"--username",
-							getTestEnvProperty("oracle_username"),
-							"--password",
-							getTestEnvProperty("oracle_password"),
-							"--table",
-							getTestEnvProperty("systemtest_table_name"),
-							"--target-dir",
-							this.sqoopTargetDirectory,
-							"--package-name",
-							"com.quest.oraoop.systemtest.gen",
-							"--bindir",
-							this.sqoopGenLibDirectory,
-							"--outdir",
-							this.sqoopGenSrcDirectory
-							};
-					Configuration sqoopConf = getSqoopConf();
-					int retCode = Sqoop.runTool(sqoopArgs,sqoopConf);
+					
+					int retCode = runImport(getTestEnvProperty("systemtest_table_name"),true);
 					assertEquals("Return code should be 0", 0,retCode);
 
 					// Add sqoop generated code to the classpath
-					String sqoopGenJarPath = "file://" + this.sqoopGenLibDirectory + "/"
+					String sqoopGenJarPath = "file://" + getSqoopGenLibDirectory() + "/"
 							+ getTestEnvProperty("systemtest_table_name") + ".jar";
 					URLClassLoader loader = new URLClassLoader(new URL[] { new URL(sqoopGenJarPath) }, getClass()
 							.getClassLoader());
@@ -191,7 +169,7 @@ public class ITSystemImport extends OraOopTestCase {
 					// Read test data from hadoop
 					Configuration hadoopConf = getSqoopConf();
 					FileSystem hdfs = FileSystem.get(hadoopConf);
-					Path path = new Path(this.sqoopTargetDirectory);
+					Path path = new Path(getSqoopTargetDirectory());
 					FileStatus[] statuses = hdfs.listStatus(path);
 					int hadoopRecordCount = 0;
 					for (FileStatus status : statuses) {
@@ -280,11 +258,7 @@ public class ITSystemImport extends OraOopTestCase {
 					rs.close();
 				} finally {
 					// Delete test data from hadoop
-					Configuration hadoopConf = getSqoopConf();
-					FileSystem hdfs = FileSystem.get(hadoopConf);
-					hdfs.delete(new Path(this.sqoopTargetDirectory), true);
-					hdfs.delete(new Path(this.sqoopGenSrcDirectory), true);
-					hdfs.delete(new Path(this.sqoopGenLibDirectory), true);
+					cleanupFolders();
 				}
 			} finally {
 				// Delete test data from oracle
@@ -293,7 +267,7 @@ public class ITSystemImport extends OraOopTestCase {
 			}
 			
 		} finally {
-			conn.close();
+			closeTestEnvConnection();
 		}
 	}
 }

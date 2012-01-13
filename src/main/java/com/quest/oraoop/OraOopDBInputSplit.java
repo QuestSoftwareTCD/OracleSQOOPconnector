@@ -21,7 +21,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.apache.hadoop.io.Text;
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
 
 class OraOopDBInputSplit extends DBInputFormat.DBInputSplit {
@@ -31,7 +31,7 @@ class OraOopDBInputSplit extends DBInputFormat.DBInputSplit {
     String splitLocation;
     private List<OraOopOracleDataChunk> oracleDataChunks;
 
-    // NB: Update serialize(), deserialize() and getDebugDetails() if you add fields here.
+    // NB: Update write(), readFields() and getDebugDetails() if you add fields here.
 
     public OraOopDBInputSplit() {
 
@@ -92,10 +92,10 @@ class OraOopDBInputSplit extends DBInputFormat.DBInputSplit {
         return result;
     }
 
-    public OraOopOracleDataChunk findDataChunkById(int id) {
+    public OraOopOracleDataChunk findDataChunkById(String id) {
 
         for (OraOopOracleDataChunk dataChunk : this.getDataChunks()) {
-            if (dataChunk.id == id)
+            if (dataChunk.id.equals(id))
                 return dataChunk;
         }
         return null;
@@ -111,11 +111,14 @@ class OraOopDBInputSplit extends DBInputFormat.DBInputSplit {
             output.writeInt(0);
         else {
             output.writeInt(this.oracleDataChunks.size());
-            for (OraOopOracleDataChunk dataChunk : this.oracleDataChunks)
-                dataChunk.serialize(output);
+            for (OraOopOracleDataChunk dataChunk : this.oracleDataChunks) {
+                Text.writeString(output, dataChunk.getClass().getName());
+                dataChunk.write(output);
+            }
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     /** {@inheritDoc} */
     public void readFields(DataInput input) throws IOException {
@@ -126,10 +129,17 @@ class OraOopDBInputSplit extends DBInputFormat.DBInputSplit {
         if (dataChunkCount == 0)
             this.oracleDataChunks = null;
         else {
+            Class<? extends OraOopOracleDataChunk> dataChunkClass;
+            OraOopOracleDataChunk dataChunk;
             this.oracleDataChunks = new ArrayList<OraOopOracleDataChunk>(dataChunkCount);
             for (int idx = 0; idx < dataChunkCount; idx++) {
-                OraOopOracleDataChunk dataChunk = new OraOopOracleDataChunk();
-                dataChunk.deserialize(input);
+                try {
+                    dataChunkClass = (Class<? extends OraOopOracleDataChunk>) Class.forName(Text.readString(input));
+                    dataChunk = dataChunkClass.newInstance();
+                } catch(Exception e) {
+                	throw new RuntimeException(e);
+                }
+                dataChunk.readFields(input);
                 this.oracleDataChunks.add(dataChunk);
             }
         }
@@ -140,15 +150,11 @@ class OraOopDBInputSplit extends DBInputFormat.DBInputSplit {
         StringBuilder result = new StringBuilder();
 
         if (this.getNumberOfDataChunks() == 0)
-            result.append(String.format("Split[%d] does not contain any Oracle data-chunks.", this.splitId));
+            result.append(String.format("Split[%s] does not contain any Oracle data-chunks.", this.splitId));
         else {
-            result.append(String.format("Split[%d] includes the Oracle data-chunks:\n", this.splitId));
+            result.append(String.format("Split[%s] includes the Oracle data-chunks:\n", this.splitId));
             for (OraOopOracleDataChunk dataChunk : getDataChunks()) {
-                result.append(String.format("\t\tRelative DataFile Number=%d\tstart-block=%s\tfinish-block=%d\t=> %d blocks.\n"
-                                           ,dataChunk.relativeDatafileNumber
-                                           ,dataChunk.startBlockNumber
-                                           ,dataChunk.finishBlockNumber
-                                           ,(dataChunk.finishBlockNumber - dataChunk.startBlockNumber) + 1));
+                result.append(dataChunk.toString());
             }
         }
         return result.toString();

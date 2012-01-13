@@ -29,6 +29,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -210,10 +211,9 @@ public class OraOopUtilities {
         return result;
     }
 
-    public static int generateDataChunkId(int fileId, int fileBatch, int maxFileBatchValue) {
-
-        int maxNumberOfDigitsForFileBatch = String.valueOf(maxFileBatchValue).length();
-        return (fileId * (int) Math.pow(10, maxNumberOfDigitsForFileBatch)) + fileBatch;
+    public static String generateDataChunkId(int fileId, int fileBatch) {
+        StringBuilder sb = new StringBuilder();
+        return sb.append(fileId).append("_").append(fileBatch).toString();
     }
 
     public static String getCurrentMethodName() {
@@ -303,6 +303,27 @@ public class OraOopUtilities {
                                ,numberOfDataChunksPerOracleDataFile));
 
         return numberOfDataChunksPerOracleDataFile;
+    }
+    
+    public static OraOopConstants.OraOopOracleDataChunkMethod getOraOopOracleDataChunkMethod(Configuration conf) {
+        if (conf == null)
+            throw new IllegalArgumentException("The conf argument cannot be null");
+        
+        String strMethod = conf.get(OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD);
+        if (strMethod == null)
+        	return OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD_DEFAULT;
+        
+        OraOopConstants.OraOopOracleDataChunkMethod result;
+        
+        try {
+        	strMethod = strMethod.toUpperCase().trim();
+        	result = OraOopConstants.OraOopOracleDataChunkMethod.valueOf(strMethod);
+        } catch(IllegalArgumentException ex) {
+        	result = OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD_DEFAULT;
+        	LOG.error("An invalid value of \"" + strMethod + "\" was specified for the \"" + OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD + "\" configuration property value.\n"+ 
+                                            "\tThe default value of " + OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD_DEFAULT + " will be used.");
+        }
+        return result;
     }
 
     public static OraOopConstants.OraOopOracleBlockToSplitAllocationMethod getOraOopOracleBlockToSplitAllocationMethod(org.apache.hadoop.conf.Configuration conf, OraOopConstants.OraOopOracleBlockToSplitAllocationMethod defaultMethod) {

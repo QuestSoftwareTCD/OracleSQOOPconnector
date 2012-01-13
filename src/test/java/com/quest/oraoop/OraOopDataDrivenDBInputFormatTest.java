@@ -32,7 +32,7 @@ public class OraOopDataDrivenDBInputFormatTest extends OraOopTestCase {
 		
 		// We're just exposing a protected method so that it can be called by this unit test...
 		@Override
-    public List<InputSplit> groupTableDataChunksIntoSplits(List<OraOopOracleDataChunk> dataChunks
+    public List<InputSplit> groupTableDataChunksIntoSplits(List<? extends OraOopOracleDataChunk> dataChunks
 				, int desiredNumberOfSplits
 				, OraOopConstants.OraOopOracleBlockToSplitAllocationMethod blockAllocationMethod) {
 			
@@ -53,7 +53,7 @@ public class OraOopDataDrivenDBInputFormatTest extends OraOopTestCase {
 		int startBlockNumber = 1;
 		for(int idx = 0; idx < 241; idx++) {
       OraOopOracleDataChunk dataChunk =
-        new OraOopOracleDataChunk(23480, 666, 1, startBlockNumber, startBlockNumber + 8);
+        new OraOopOracleDataChunkExtent("23480", 666, 1, startBlockNumber, startBlockNumber + 8);
 			startBlockNumber += 8;
 			dataChunks.add(dataChunk);
 		}

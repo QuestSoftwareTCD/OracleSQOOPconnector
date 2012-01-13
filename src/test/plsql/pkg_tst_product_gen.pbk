@@ -50,7 +50,8 @@ AS
             $COLUMN_LIST
          )
          NOLOGGING
-         PARALLEL';
+         PARALLEL
+         $PARTITION_CLAUSE';
    END;
 
    PROCEDURE prc_insert_data (i_degree NUMBER)

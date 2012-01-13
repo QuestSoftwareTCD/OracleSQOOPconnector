@@ -119,6 +119,13 @@ public class OraOopConstants {
     // The name of the configuration property containing the string we want to pass to
     // dbms_application_info.set_module() via the "action_name" parameter...
     public static final String ORACLE_SESSION_ACTION_NAME = "oraoop.oracle.session.module.action";
+    
+    // The method that will be used to create data chunks - ROWID ranges or partitions
+    public static final String ORAOOP_ORACLE_DATA_CHUNK_METHOD = "oraoop.chunk.method";
+    public enum OraOopOracleDataChunkMethod {
+    	ROWID, PARTITION
+    }
+    public static final OraOopOracleDataChunkMethod ORAOOP_ORACLE_DATA_CHUNK_METHOD_DEFAULT = OraOopOracleDataChunkMethod.ROWID;
 
     // How to allocate data-chunks into splits...
     public static final String ORAOOP_ORACLE_BLOCK_TO_SPLIT_ALLOCATION_METHOD = "oraoop.block.allocation";

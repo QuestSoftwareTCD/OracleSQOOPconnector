@@ -72,6 +72,7 @@ public abstract class OracleData {
 		pkgSql = pkgSql.replaceAll("\\$COLUMN_LIST", getColumnList(tableDefinition.getColumnList()));
 		pkgSql = pkgSql.replaceAll("\\$TABLE_NAME", tableDefinition.getTableName());
 		pkgSql = pkgSql.replaceAll("\\$DATA_EXPRESSION_LIST", getDataExpression(tableDefinition.getColumnList()));
+		pkgSql = pkgSql.replaceAll("\\$PARTITION_CLAUSE", tableDefinition.getPartitionClause());
 		PreparedStatement stmt = conn.prepareStatement(pkgSql);
 		stmt.execute();
 	}

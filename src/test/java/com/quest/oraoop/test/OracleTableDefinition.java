@@ -16,14 +16,17 @@
 
 package com.quest.oraoop.test;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Iterator;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
 
 public class OracleTableDefinition {
 	
@@ -31,6 +34,7 @@ public class OracleTableDefinition {
 	private List<OracleDataDefinition> columnList = new ArrayList<OracleDataDefinition>();
 	private List<String> primaryKeyColumns = new ArrayList<String>();
 	private List<String> uniqueKeyColumns = new ArrayList<String>();
+	private String partitionClause;
 	
 	public List<String> getUniqueKeyColumns() {
 		return uniqueKeyColumns;
@@ -56,29 +60,59 @@ public class OracleTableDefinition {
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
 	}
-	
+	public String getPartitionClause() {
+		return partitionClause == null ? "" : partitionClause;
+	}
+	public void setPartitionClause(String partitionClause) {
+		this.partitionClause = partitionClause;
+	}
 	public OracleTableDefinition() {
 		
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	public OracleTableDefinition(URL url) {
 		try {
-			XMLConfiguration conf = new XMLConfiguration();
-			conf.setDelimiterParsingDisabled(true);
-			conf.load(url);
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document doc = builder.parse(new File(url.toURI()));
 			
-			tableName = conf.getString("name");
-			
-			List<?> columns = conf.configurationsAt("columns.column");
-			for(Iterator<?> it = columns.iterator(); it.hasNext(); ) {
-				HierarchicalConfiguration sub = (HierarchicalConfiguration) it.next();
-				this.columnList.add(new OracleDataDefinition(sub.getString("name"), sub.getString("dataType"), sub.getString("dataExpression")));
+			Element table = doc.getDocumentElement();
+			this.tableName = table.getElementsByTagName("name").item(0).getChildNodes().item(0).getNodeValue();
+			NodeList columns = table.getElementsByTagName("column");
+			for (int i = 0; i < columns.getLength(); i++) {
+				Node columnNode = columns.item(i);
+				if (columnNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element columnElement = (Element) columnNode;
+					String name = columnElement.getElementsByTagName("name").item(0).getChildNodes().item(0).getNodeValue();
+					String dataType = columnElement.getElementsByTagName("dataType").item(0).getChildNodes().item(0).getNodeValue();
+					String dataExpression = columnElement.getElementsByTagName("dataExpression").item(0).getChildNodes().item(0).getNodeValue();
+					this.columnList.add(new OracleDataDefinition(name,dataType,dataExpression));
+				}
 			}
 			
-			primaryKeyColumns = conf.getList("primaryKeyColumns.primaryKeyColumn");
-			uniqueKeyColumns = conf.getList("uniqueKeyColumns.uniqueKeyColumn");
-		} catch (ConfigurationException e) {
+			NodeList primaryKeyColumns = table.getElementsByTagName("primaryKeyColumn");
+			for (int i = 0; i < primaryKeyColumns.getLength(); i++) {
+				Node primaryKeyColumnNode = primaryKeyColumns.item(i);
+				if (primaryKeyColumnNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element primaryKeyColumnElement = (Element) primaryKeyColumnNode;
+					this.primaryKeyColumns.add(primaryKeyColumnElement.getChildNodes().item(0).getNodeValue());
+				}
+			}
+			
+			NodeList uniqueKeyColumns = table.getElementsByTagName("uniqueKeyColumn");
+			for (int i = 0; i < uniqueKeyColumns.getLength(); i++) {
+				Node uniqueKeyColumnNode = uniqueKeyColumns.item(i);
+				if (uniqueKeyColumnNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element uniqueKeyColumnElement = (Element) uniqueKeyColumnNode;
+					this.uniqueKeyColumns.add(uniqueKeyColumnElement.getChildNodes().item(0).getNodeValue());
+				}
+			}
+			
+			Node partitionClauseNode = table.getElementsByTagName("partitionClause").item(0);
+			if (partitionClauseNode!=null) {
+				this.partitionClause = partitionClauseNode.getChildNodes().item(0).getNodeValue();
+			}
+		} catch(Exception e) {
 			throw new RuntimeException("Could not load table configuration",e);
 		}
 	}

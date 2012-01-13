@@ -16,57 +16,22 @@
 
 package com.quest.oraoop;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.lang.reflect.Field;
 
-public class OraOopOracleDataChunk {
+import org.apache.hadoop.io.Writable;
 
-    int id;
-    int oracleDataObjectId;
-    int relativeDatafileNumber;
-    int startBlockNumber;
-    int finishBlockNumber;
-
-    OraOopOracleDataChunk() {
-
+public abstract class OraOopOracleDataChunk implements Writable {
+	
+    String id;
+	
+    public abstract int getNumberOfBlocks();
+    
+    public String getWhereClause() {
+    	return "1=1";
     }
-
-    OraOopOracleDataChunk(int id, int oracleDataObjectId, int relativeDatafileNumber, int startBlockNumber, int finishBlockNumber) {
-
-        this.id = id;
-        this.oracleDataObjectId = oracleDataObjectId;
-        this.relativeDatafileNumber = relativeDatafileNumber;
-        this.startBlockNumber = startBlockNumber;
-        this.finishBlockNumber = finishBlockNumber;
-    }
-
-    public void serialize(DataOutput output) throws IOException {
-
-        output.writeInt(this.id);
-        output.writeInt(this.oracleDataObjectId);
-        output.writeInt(this.relativeDatafileNumber);
-        output.writeInt(this.startBlockNumber);
-        output.writeInt(this.finishBlockNumber);
-    }
-
-    public void deserialize(DataInput input) throws IOException {
-
-        this.id = input.readInt();
-        this.oracleDataObjectId = input.readInt();
-        this.relativeDatafileNumber = input.readInt();
-        this.startBlockNumber = input.readInt();
-        this.finishBlockNumber = input.readInt();
-    }
-
-    public int getNumberOfBlocks() {
-
-        if (this.finishBlockNumber == 0 && 
-            this.startBlockNumber == 0)
-            return 0;
-        else
-            return (this.finishBlockNumber - this.startBlockNumber) + 1;
+    
+    public String getPartitionClause() {
+    	return "";
     }
 
     @Override

@@ -37,7 +37,7 @@ public class ITOraOopOracleQueries extends OraOopTestCase {
 			schema = OraOopOracleQueries.getCurrentSchema(conn);
 			Assert.assertEquals("SYS", schema);
 		} finally {
-			conn.close();
+			closeTestEnvConnection();
 		}
 	}
 

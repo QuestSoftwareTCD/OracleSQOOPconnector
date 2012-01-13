@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configurable;
@@ -65,14 +66,24 @@ public class OraOopDataDrivenDBInputFormat<T extends DBWritable> extends DataDri
             int numberOfChunksPerOracleDataFile = (desiredNumberOfMappers * 2) + 1;
 
             // Get the Oracle data-chunks for the table...
-      List<OraOopOracleDataChunk> dataChunks =
-        OraOopOracleQueries.getOracleDataChunks(jobContext.getConfiguration(), connection
+            List<? extends OraOopOracleDataChunk> dataChunks;
+            if(OraOopUtilities.getOraOopOracleDataChunkMethod(getConf()).equals(OraOopConstants.OraOopOracleDataChunkMethod.PARTITION)) {
+            	dataChunks = OraOopOracleQueries.getOracleDataChunksPartition(connection, table);
+            } else {
+            	dataChunks = OraOopOracleQueries.getOracleDataChunksExtent(jobContext.getConfiguration(), connection
                                                                                             ,table
                                                                                             ,numberOfChunksPerOracleDataFile);
+            }
 
             if (dataChunks.size() == 0) {
-                String errMsg = String.format("The table %s does not contain any data."
+            	String errMsg;
+            	if(OraOopUtilities.getOraOopOracleDataChunkMethod(getConf()).equals(OraOopConstants.OraOopOracleDataChunkMethod.PARTITION)) {
+            		errMsg = String.format("The table %s does not contain any partitions and you have specified to chunk the table by partitions."
+                            ,table.getName());
+            	} else {
+            		errMsg = String.format("The table %s does not contain any data."
                                              ,table.getName());
+            	}
                 LOG.fatal(errMsg);
                 throw new RuntimeException(errMsg);
             }
@@ -202,7 +213,7 @@ public class OraOopDataDrivenDBInputFormat<T extends DBWritable> extends DataDri
         return desiredNumberOfMappers;
     }
 
-    protected List<InputSplit> groupTableDataChunksIntoSplits(List<OraOopOracleDataChunk> dataChunks, int desiredNumberOfSplits, OraOopConstants.OraOopOracleBlockToSplitAllocationMethod blockAllocationMethod) {
+    protected List<InputSplit> groupTableDataChunksIntoSplits(List<? extends OraOopOracleDataChunk> dataChunks, int desiredNumberOfSplits, OraOopConstants.OraOopOracleBlockToSplitAllocationMethod blockAllocationMethod) {
 
         int numberOfDataChunks = dataChunks.size();
         int actualNumberOfSplits = Math.min(numberOfDataChunks, desiredNumberOfSplits);
@@ -233,10 +244,7 @@ public class OraOopDataDrivenDBInputFormat<T extends DBWritable> extends DataDri
 
             case RANDOM: {
                 // Randomize the order of the data chunks and then "fall through" into the ROUNDROBIN block below...
-
-                OraOopGenerics generics = new OraOopGenerics();
-                OraOopGenerics.ListRandomizer<OraOopOracleDataChunk> r = generics.new ListRandomizer<OraOopOracleDataChunk>();
-                r.randomizeList(dataChunks);
+            	Collections.shuffle(dataChunks);
 
                 // NB: No "break;" statement here - we're intentionally falling into the ROUNDROBIN block below...
             }

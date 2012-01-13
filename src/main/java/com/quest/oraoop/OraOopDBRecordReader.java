@@ -59,7 +59,7 @@ class OraOopDBRecordReader<T extends DBWritable> extends DataDrivenDBRecordReade
     private OraOopDBInputSplit dbInputSplit;            //<- The split this record-reader is working on.
     private int numberOfBlocksInThisSplit;              //<- The number of Oracle blocks in this Oracle data-chunk.
     private int numberOfBlocksProcessedInThisSplit;     //<- How many Oracle blocks we've processed with this record-reader.
-    private int currentDataChunkId = -1;                //<- The id of the current data-chunk being processed
+    private String currentDataChunkId;                  //<- The id of the current data-chunk being processed
     private ResultSet results;                          //<- The ResultSet containing the data from the query returned by getSelectQuery()
     private int columnIndexDataChunkIdZeroBased = -1;   //<- The zero-based column index of the data_chunk_id column.
     private boolean progressCalculationErrorLogged;     //<- Whether we've logged a problem with the progress calculation during nextKeyValue().
@@ -187,11 +187,13 @@ class OraOopDBRecordReader<T extends DBWritable> extends DataDrivenDBRecordReade
 
             query.append(" FROM ")
                  .append(this.getTableName())
+                 .append(" ")
+                 .append(getPartitionClauseForDataChunk(this.dbInputSplit, idx))
                  .append(" t")
                  .append("\n");
 
             query.append(" WHERE (")
-                 .append(getRowIdClauseForDataChunk(this.dbInputSplit, idx))
+                 .append(getWhereClauseForDataChunk(this.dbInputSplit, idx))
                  .append(")\n");
 
             // If the user wants the WHERE clause applied to each data-chunk...
@@ -212,7 +214,7 @@ class OraOopDBRecordReader<T extends DBWritable> extends DataDrivenDBRecordReade
                 conditions.length() > 0) {
 
                 // Insert a "select everything" line at the start of the SQL query...
-                query.insert(0, getColumnNamesClause(tableColumns, -1) + " FROM (\n");
+                query.insert(0, getColumnNamesClause(tableColumns, null) + " FROM (\n");
 
                 // ...and then apply the WHERE clause to all the UNIONed sub-queries...
                 query.append(")\n")
@@ -227,7 +229,7 @@ class OraOopDBRecordReader<T extends DBWritable> extends DataDrivenDBRecordReade
         return query.toString();
     }
 
-    private String getColumnNamesClause(OracleTableColumns tableColumns, int dataChunkId) {
+    private String getColumnNamesClause(OracleTableColumns tableColumns, String dataChunkId) {
 
         StringBuilder result = new StringBuilder();
 
@@ -254,8 +256,8 @@ class OraOopDBRecordReader<T extends DBWritable> extends DataDrivenDBRecordReade
             // then we need to insert the value of that data_chunk_id now...
             if (i == this.columnIndexDataChunkIdZeroBased && 
                 fieldName == OraOopConstants.COLUMN_NAME_DATA_CHUNK_ID)
-                if (dataChunkId > -1)
-                    fieldName = String.format("%d %s"
+                if (dataChunkId != null && !dataChunkId.isEmpty())
+                    fieldName = String.format("'%s' %s"
                                              ,dataChunkId
                                              ,OraOopConstants.COLUMN_NAME_DATA_CHUNK_ID);
 
@@ -263,22 +265,16 @@ class OraOopDBRecordReader<T extends DBWritable> extends DataDrivenDBRecordReade
         }
         return result.toString();
     }
+    
+    private String getPartitionClauseForDataChunk(OraOopDBInputSplit split, int dataChunkIndex) {
+        OraOopOracleDataChunk dataChunk = split.getDataChunks().get(dataChunkIndex);
+        return dataChunk.getPartitionClause();
+    }
 
-    private String getRowIdClauseForDataChunk(OraOopDBInputSplit split, int dataChunkIndex) {
+    private String getWhereClauseForDataChunk(OraOopDBInputSplit split, int dataChunkIndex) {
 
         OraOopOracleDataChunk dataChunk = split.getDataChunks().get(dataChunkIndex);
-        return String.format("(rowid >= dbms_rowid.rowid_create(%d, %d, %d, %d, %d)"
-                            ,OraOopConstants.Oracle.ROWID_EXTENDED_ROWID_TYPE
-                            ,dataChunk.oracleDataObjectId
-                            ,dataChunk.relativeDatafileNumber
-                            ,dataChunk.startBlockNumber
-                            ,0) +
-               String.format(" AND rowid <= dbms_rowid.rowid_create(%d, %d, %d, %d, %d))"
-                            ,OraOopConstants.Oracle.ROWID_EXTENDED_ROWID_TYPE
-                            ,dataChunk.oracleDataObjectId
-                            ,dataChunk.relativeDatafileNumber
-                            ,dataChunk.finishBlockNumber
-                            ,OraOopConstants.Oracle.ROWID_MAX_ROW_NUMBER_PER_BLOCK);
+        return dataChunk.getWhereClause();
     }
 
     /** {@inheritDoc} */
@@ -317,10 +313,10 @@ class OraOopDBRecordReader<T extends DBWritable> extends DataDrivenDBRecordReade
             if (result && 
                 this.results != null) {
 
-                int thisDataChunkId = -2;
+                String thisDataChunkId = null;
                 try {
                     // ColumnIndexes are 1-based in jdbc...
-                    thisDataChunkId = this.results.getInt(this.columnIndexDataChunkIdZeroBased + 1);
+                    thisDataChunkId = this.results.getString(this.columnIndexDataChunkIdZeroBased + 1);
                 }
                 catch (SQLException ex) {
                     if (!progressCalculationErrorLogged) {
@@ -338,8 +334,8 @@ class OraOopDBRecordReader<T extends DBWritable> extends DataDrivenDBRecordReade
                     }
                 }
 
-                if (this.currentDataChunkId != thisDataChunkId) {
-                    if (this.currentDataChunkId != -1) {
+                if (thisDataChunkId != null && !thisDataChunkId.equals(this.currentDataChunkId)) {
+                    if (this.currentDataChunkId != null && !this.currentDataChunkId.isEmpty()) {
                         OraOopOracleDataChunk dataChunk = this.dbInputSplit.findDataChunkById(thisDataChunkId);
                         if (dataChunk != null)
                             this.numberOfBlocksProcessedInThisSplit += dataChunk.getNumberOfBlocks();

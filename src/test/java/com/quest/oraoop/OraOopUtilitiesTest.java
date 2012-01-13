@@ -122,27 +122,15 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 
 		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
 		
-		int expected;
-		int actual;
+		String expected;
+		String actual;
 		
-		expected = 11;
-		actual = OraOopUtilities.generateDataChunkId(1, 1, 1);
-		Assert.assertEquals(expected, actual);
-		
-		expected = 11;
-		actual = OraOopUtilities.generateDataChunkId(1, 1, 9);
-		Assert.assertEquals(expected, actual);		
-
-		expected = 101;
-		actual = OraOopUtilities.generateDataChunkId(1, 1, 10);
-		Assert.assertEquals(expected, actual);	
-		
-		expected = 101;
-		actual = OraOopUtilities.generateDataChunkId(1, 1, 50);
+		expected = "1_1";
+		actual = OraOopUtilities.generateDataChunkId(1, 1);
 		Assert.assertEquals(expected, actual);			
 		
-		expected = 1234099;
-		actual = OraOopUtilities.generateDataChunkId(1234, 99, 200);
+		expected = "1234_99";
+		actual = OraOopUtilities.generateDataChunkId(1234, 99);
 		Assert.assertEquals(expected, actual);			
 				
 		System.out.println("Finished");
@@ -231,6 +219,39 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 		}
 		
 		System.out.println("Finished");
+	}
+	
+	@Test
+	public void testGetOraOopOracleDataChunkMethod() {
+		try {
+			OraOopUtilities.getOraOopOracleDataChunkMethod(null);
+			Assert.fail("An IllegalArgumentException should be been thrown.");
+		} catch(IllegalArgumentException ex) {
+			// This is what we want to happen. 
+		}
+		
+		OraOopConstants.OraOopOracleDataChunkMethod dataChunkMethod;
+		Configuration conf = new Configuration();
+		
+		//Check the default is ROWID
+		dataChunkMethod = OraOopUtilities.getOraOopOracleDataChunkMethod(conf);
+		Assert.assertEquals(OraOopConstants.OraOopOracleDataChunkMethod.ROWID, dataChunkMethod);
+		
+		//Invalid value specified
+		OraOopUtilities.LOG.setCacheLogEntries(true);
+		OraOopUtilities.LOG.clearCache();
+		conf.set(OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD, "loremipsum");
+		dataChunkMethod = OraOopUtilities.getOraOopOracleDataChunkMethod(conf);
+		String logText = OraOopUtilities.LOG.getLogEntries();
+		OraOopUtilities.LOG.setCacheLogEntries(false);
+		if(!logText.toLowerCase().contains("loremipsum"))
+			Assert.fail("The LOG should inform the user they've selected an invalid data chunk method - and what that was.");
+		Assert.assertEquals("Should have used the default value",OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD_DEFAULT, dataChunkMethod);
+		
+		//Valid value specified
+		conf.set(OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD, "partition");
+		dataChunkMethod = OraOopUtilities.getOraOopOracleDataChunkMethod(conf);
+		Assert.assertEquals(OraOopConstants.OraOopOracleDataChunkMethod.PARTITION, dataChunkMethod);
 	}
 	
 	@Test

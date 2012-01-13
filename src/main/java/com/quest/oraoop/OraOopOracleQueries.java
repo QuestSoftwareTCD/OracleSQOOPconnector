@@ -113,14 +113,65 @@ public class OraOopOracleQueries {
 
         return result;
     }
+    
+  public static List<OraOopOracleDataChunkPartition> getOracleDataChunksPartition(Connection connection, OracleTable table)
+  throws SQLException
+  {
+	  List<OraOopOracleDataChunkPartition> result = new ArrayList<OraOopOracleDataChunkPartition>();
+	  String sql = "SELECT " +
+			"  pl.partition_name, " +
+			"  pl.is_subpartition, " +
+			"  SUM(blocks) blocks " +
+			"FROM " +
+			"  (SELECT tp.table_owner, " +
+			"    tp.table_name, " +
+			"    NVL(tsp.subpartition_name,tp.partition_name) partition_name, " +
+			"    nvl2(tsp.subpartition_name,1,0) is_subpartition " +
+			"  FROM dba_tab_partitions tp, " +
+			"    dba_tab_subpartitions tsp " +
+			"  WHERE tp.table_owner     = :table_owner" +
+			"  AND tp.table_name        = :table_name" +
+			"  AND tsp.table_owner(+)   =tp.table_owner " +
+			"  AND tsp.table_name(+)    =tp.table_name " +
+			"  AND tsp.partition_name(+)=tp.partition_name " +
+			"  ) pl, " +
+			"  dba_extents e " +
+			"WHERE e.owner       =pl.table_owner " +
+			"AND e.segment_name  =pl.table_name " +
+			"AND e.partition_name=pl.partition_name " +
+			"GROUP BY pl.table_owner, " +
+			"  pl.table_name, " +
+			"  pl.partition_name, " +
+			"  pl.is_subpartition";
+	  
+	  OraclePreparedStatement statement = (OraclePreparedStatement) connection.prepareStatement(sql);
+	  statement.setStringAtName("table_owner", table.getSchema());
+	  statement.setStringAtName("table_name", table.getName());
+	  
+	  trace(String.format("%s SQL Query =\n%s", OraOopUtilities.getCurrentMethodName(),
+				sql.replace(":table_owner", table.getSchema())
+						.replace(":table_name", table.getName())));
+	  
+	  ResultSet resultSet = statement.executeQuery();
+	  
+	  while (resultSet.next()) {
+		  OraOopOracleDataChunkPartition dataChunk = new OraOopOracleDataChunkPartition(resultSet.getString("partition_name"),
+				  																		resultSet.getBoolean("is_subpartition"),
+				  																		resultSet.getInt("blocks"));
+		  result.add(dataChunk);
+	  }
+	  resultSet.close();
+      statement.close();
+	  return result;
+  }
 
-  public static List<OraOopOracleDataChunk> getOracleDataChunks(Configuration conf, Connection connection,
+  public static List<OraOopOracleDataChunkExtent> getOracleDataChunksExtent(Configuration conf, Connection connection,
                                                                 OracleTable table,
                                                                 int numberOfChunksPerOracleDataFile)
       throws SQLException
   {
 
-        List<OraOopOracleDataChunk> result = new ArrayList<OraOopOracleDataChunk>();
+        List<OraOopOracleDataChunkExtent> result = new ArrayList<OraOopOracleDataChunkExtent>();
         
         String sql =
           "SELECT data_object_id, " +
@@ -179,8 +230,8 @@ public class OraOopOracleQueries {
         while (resultSet.next()) {
             int fileId = resultSet.getInt("relative_fno");
             int fileBatch = resultSet.getInt("file_batch");
-            int dataChunkId = OraOopUtilities.generateDataChunkId(fileId, fileBatch, numberOfChunksPerOracleDataFile);
-            OraOopOracleDataChunk dataChunk = new OraOopOracleDataChunk(dataChunkId,
+            String dataChunkId = OraOopUtilities.generateDataChunkId(fileId, fileBatch);
+            OraOopOracleDataChunkExtent dataChunk = new OraOopOracleDataChunkExtent(dataChunkId,
                                                                         resultSet.getInt("data_object_id")
                                                                        ,resultSet.getInt("relative_fno")
                                                                        ,resultSet.getInt("start_block_id")

@@ -19,50 +19,8 @@ package com.quest.oraoop;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 
 public class OraOopGenerics {
-
-    public class ListRandomizer<T> {
-
-        public void randomizeList(List<T> list) {
-
-            if (list == null)
-                throw new IllegalArgumentException("No list was passed.");
-
-            if (list.size() == 0)
-                return;
-
-            Random random = new Random();
-            int randomIdx;
-            T tmp;
-
-            // The "repeats" loop performs the "randomization of the list"
-            // multiple times. If the "randomization of the list" is only
-            // performed once, the results is a noticeably non-uniform
-            // distribution of combinations. i.e. In a list containing 4
-            // items, 4 (of the 24 possible) combinations routinely occur
-            // 30% more frequently than the other (20 possible) combinations.
-            // This is quite obvious when a histogram of the combinations
-            // is plotted.
-            // (Change the upper-bound of the repeats loop to 2 and then run
-            // the "testRandomizeList" unit-test to observe this.)
-            // In practice, it seems we only need to repeat the
-            // "randomization of the list" twice in order for the histogram
-            // of combinations to become much more uniform.
-            for (int repeats = 0; repeats < 2; repeats++) {
-                for (int idx = 0; idx < list.size(); idx++) {
-                    randomIdx = random.nextInt(list.size());
-                    if (idx != randomIdx) {
-                        tmp = list.get(idx);
-                        list.set(idx, list.get(randomIdx));
-                        list.set(randomIdx, tmp);
-                    }
-                }
-            }
-
-        }
-    }
 
     public static class ObjectList<T> {
 

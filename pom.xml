@@ -37,7 +37,7 @@
     <dependency>
       <groupId>com.cloudera.sqoop</groupId>
       <artifactId>sqoop</artifactId>
-      <version>1.3.0-cdh3u1</version>
+      <version>1.3.0-cdh3u3</version>
     </dependency>
 
     <dependency>
@@ -127,18 +127,9 @@
 
   <repositories>
     <repository>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>central</id>
+      <id>cloudera</id>
       <name>libs-release</name>
-      <url>https://repository.cloudera.com/artifactory/libs-release</url>
-    </repository>
-    <repository>
-      <snapshots />
-      <id>snapshots</id>
-      <name>libs-snapshot</name>
-      <url>https://repository.cloudera.com/artifactory/libs-snapshot</url>
+      <url>https://repository.cloudera.com/artifactory/repo</url>
     </repository>
   </repositories>
 </project>

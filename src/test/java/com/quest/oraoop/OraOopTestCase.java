@@ -163,10 +163,10 @@ public abstract class OraOopTestCase {
 	}
 	
 	protected int runImport(String tableName, boolean sequenceFile) {
-		return runImport(tableName,sequenceFile, OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD_DEFAULT);
+		return runImport(tableName,sequenceFile, OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD_DEFAULT, null);
 	}
 
-	protected int runImport(String tableName, boolean sequenceFile, OraOopConstants.OraOopOracleDataChunkMethod dataChunkMethod) {
+	protected int runImport(String tableName, boolean sequenceFile, OraOopConstants.OraOopOracleDataChunkMethod dataChunkMethod, String partitionList) {
 		List<String> sqoopArgs = new ArrayList<String>();
 
 		sqoopArgs.add("import");
@@ -206,6 +206,11 @@ public abstract class OraOopTestCase {
 
 		Configuration sqoopConf = getSqoopConf();
 		sqoopConf.set(OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD, dataChunkMethod.toString());
+		
+		if(partitionList!=null && !partitionList.isEmpty()) {
+		  sqoopConf.set(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST, partitionList);
+		}
+		
 		return Sqoop.runTool(sqoopArgs.toArray(new String[sqoopArgs.size()]),sqoopConf);
 	}
 	

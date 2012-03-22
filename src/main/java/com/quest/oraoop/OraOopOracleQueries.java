@@ -114,7 +114,24 @@ public class OraOopOracleQueries {
         return result;
     }
     
-  public static List<OraOopOracleDataChunkPartition> getOracleDataChunksPartition(Connection connection, OracleTable table)
+    private static String getPartitionBindVars(List<String> partitionList) {
+      String result = "";
+      for(int i=1; i<=partitionList.size(); i++) {
+        result += (i > 1) ? "," : "";
+        result += ":part"+i;
+      }
+      return result;
+    }
+    
+    private static void bindPartitionBindVars(OraclePreparedStatement statement, List<String> partitionList) throws SQLException {
+      int i = 0;
+      for(String partition : partitionList) {
+        i++;
+        statement.setStringAtName("part"+i, partition);
+      }
+    }
+    
+  public static List<OraOopOracleDataChunkPartition> getOracleDataChunksPartition(Connection connection, OracleTable table, List<String> partitionList)
   throws SQLException
   {
 	  List<OraOopOracleDataChunkPartition> result = new ArrayList<OraOopOracleDataChunkPartition>();
@@ -133,8 +150,14 @@ public class OraOopOracleQueries {
 			"  AND tp.table_name        = :table_name" +
 			"  AND tsp.table_owner(+)   =tp.table_owner " +
 			"  AND tsp.table_name(+)    =tp.table_name " +
-			"  AND tsp.partition_name(+)=tp.partition_name " +
-			"  ) pl, " +
+			"  AND tsp.partition_name(+)=tp.partition_name ";
+			
+	  
+	  if(partitionList != null && partitionList.size()>0) {
+	    sql += " AND tp.partition_name IN (" + getPartitionBindVars(partitionList) + ") ";
+	  }
+	  
+			sql += "  ) pl, " +
 			"  dba_extents e " +
 			"WHERE e.owner       =pl.table_owner " +
 			"AND e.segment_name  =pl.table_name " +
@@ -147,6 +170,10 @@ public class OraOopOracleQueries {
 	  OraclePreparedStatement statement = (OraclePreparedStatement) connection.prepareStatement(sql);
 	  statement.setStringAtName("table_owner", table.getSchema());
 	  statement.setStringAtName("table_name", table.getName());
+	  
+    if(partitionList != null && partitionList.size()>0) {
+      bindPartitionBindVars(statement, partitionList);
+    }
 	  
 	  trace(String.format("%s SQL Query =\n%s", OraOopUtilities.getCurrentMethodName(),
 				sql.replace(":table_owner", table.getSchema())
@@ -167,6 +194,7 @@ public class OraOopOracleQueries {
 
   public static List<OraOopOracleDataChunkExtent> getOracleDataChunksExtent(Configuration conf, Connection connection,
                                                                 OracleTable table,
+                                                                List<String> partitionList,
                                                                 int numberOfChunksPerOracleDataFile)
       throws SQLException
   {
@@ -189,14 +217,14 @@ public class OraOopOracleQueries {
           "e.blocks, " +
           "CEIL ( " +
           "   SUM ( " +
-          "      blocks) " +
+          "      e.blocks) " +
           "   OVER (PARTITION BY o.data_object_id, e.file_id " +
           "         ORDER BY e.block_id ASC) " +
           "   / (SUM (e.blocks) " +
           "         OVER (PARTITION BY o.data_object_id, e.file_id) " +
           "      / :numchunks)) " +
           "   file_batch " +
-          "FROM dba_extents e, dba_objects o " +
+          "FROM dba_extents e, dba_objects o, dba_tab_subpartitions tsp " +
           "WHERE     o.owner = :owner " +
           "AND o.object_name = :object_name " +
           "AND e.owner = :owner " +
@@ -204,7 +232,16 @@ public class OraOopOracleQueries {
           "AND o.owner = e.owner " +
           "AND o.object_name = e.segment_name " +
           "AND (o.subobject_name = e.partition_name " +
-          "     OR (o.subobject_name IS NULL AND e.partition_name IS NULL))) " +
+          "     OR (o.subobject_name IS NULL AND e.partition_name IS NULL)) " +
+          "AND o.owner = tsp.table_owner(+) " +
+          "AND o.object_name = tsp.table_name(+) " +
+          "AND o.subobject_name = tsp.subpartition_name(+) ";
+
+        if(partitionList != null && partitionList.size()>0) {
+          sql += " AND case when o.object_type='TABLE SUBPARTITION' then tsp.partition_name else o.subobject_name end IN (" + getPartitionBindVars(partitionList) + ") ";
+        }
+
+          sql += ") " +
           "GROUP BY data_object_id, " +
           "         file_id, " +
           "         relative_fno, " +
@@ -220,6 +257,10 @@ public class OraOopOracleQueries {
 		statement.setIntAtName("numchunks", numberOfChunksPerOracleDataFile);
 		statement.setStringAtName("owner", table.getSchema());
 		statement.setStringAtName("object_name", table.getName());
+		
+    if(partitionList != null && partitionList.size()>0) {
+      bindPartitionBindVars(statement, partitionList);
+    }
 
 		trace(String.format("%s SQL Query =\n%s", OraOopUtilities.getCurrentMethodName(),
 				sql.replace(":numchunks", Integer.toString(numberOfChunksPerOracleDataFile)).replace(":owner", table.getSchema())

@@ -125,6 +125,10 @@ public class OraOopConstants {
     public enum OraOopOracleDataChunkMethod {
     	ROWID, PARTITION
     }
+
+    // List of partitions to be imported, comma seperated list
+    public static final String ORAOOP_IMPORT_PARTITION_LIST = "oraoop.import.partitions";
+
     public static final OraOopOracleDataChunkMethod ORAOOP_ORACLE_DATA_CHUNK_METHOD_DEFAULT = OraOopOracleDataChunkMethod.ROWID;
 
     // How to allocate data-chunks into splits...

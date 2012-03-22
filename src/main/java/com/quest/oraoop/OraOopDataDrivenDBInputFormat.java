@@ -52,6 +52,7 @@ public class OraOopDataDrivenDBInputFormat<T extends DBWritable> extends DataDri
 
         // Resolve the Oracle owner and name of the table we're importing...
         OracleTable table = identifyOracleTableFromJobContext(jobContext);
+        List<String> partitionList = getPartitionList(jobContext);
 
         // Get our Oracle connection...
         Connection connection = getConnection();
@@ -68,10 +69,11 @@ public class OraOopDataDrivenDBInputFormat<T extends DBWritable> extends DataDri
             // Get the Oracle data-chunks for the table...
             List<? extends OraOopOracleDataChunk> dataChunks;
             if(OraOopUtilities.getOraOopOracleDataChunkMethod(getConf()).equals(OraOopConstants.OraOopOracleDataChunkMethod.PARTITION)) {
-            	dataChunks = OraOopOracleQueries.getOracleDataChunksPartition(connection, table);
+            	dataChunks = OraOopOracleQueries.getOracleDataChunksPartition(connection, table, partitionList);
             } else {
             	dataChunks = OraOopOracleQueries.getOracleDataChunksExtent(jobContext.getConfiguration(), connection
                                                                                             ,table
+                                                                                            ,partitionList
                                                                                             ,numberOfChunksPerOracleDataFile);
             }
 
@@ -211,6 +213,18 @@ public class OraOopDataDrivenDBInputFormat<T extends DBWritable> extends DataDri
         }
 
         return desiredNumberOfMappers;
+    }
+    
+    private List<String> getPartitionList(JobContext jobContext) {
+      String[] partitionListArr = jobContext.getConfiguration().getStrings(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST);
+      List<String> partitionList = null;
+      if(partitionListArr!=null && partitionListArr.length>0) {
+        partitionList = new ArrayList<String>(partitionListArr.length);
+        for (String partition : partitionListArr) {
+          partitionList.add(partition);
+        }
+      }
+      return partitionList;
     }
 
     protected List<InputSplit> groupTableDataChunksIntoSplits(List<? extends OraOopOracleDataChunk> dataChunks, int desiredNumberOfSplits, OraOopConstants.OraOopOracleBlockToSplitAllocationMethod blockAllocationMethod) {

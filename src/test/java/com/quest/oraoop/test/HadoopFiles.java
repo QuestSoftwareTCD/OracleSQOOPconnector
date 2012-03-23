@@ -16,27 +16,19 @@
 
 package com.quest.oraoop.test;
 
-import org.apache.hadoop.fs.FsShell;
-import org.apache.hadoop.util.ToolRunner;
+
+import java.io.IOException;
+import java.net.URI;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 public abstract class HadoopFiles {
 	
-	private static void runFsShell(String[] argv) throws Exception {
-		FsShell shell = new FsShell();
-		try {
-			ToolRunner.run(shell, argv);
-		} finally {
-			shell.close();
-		}
+	public static void delete(Path file, boolean recursive) throws Exception {
+	  FileSystem fileSystem = FileSystem.get(file.toUri(), new Configuration());
+	  fileSystem.delete(file, recursive);
 	}
-	
-	public static void deleteFolder(String folder) throws Exception {
-		String[] argv = { "-rmr", folder };
-		runFsShell(argv);
-	}
-	
-	public static void deleteFile(String file) throws Exception {
-		String[] argv = { "-rm", file };
-		runFsShell(argv);
-	}
+
 }

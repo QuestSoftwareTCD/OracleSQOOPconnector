@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import junit.framework.Assert;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
@@ -145,10 +146,10 @@ public abstract class OraOopTestCase {
 			try {
 				long startTime = System.currentTimeMillis();
 				OracleData.createTable(conn, fileName, parallelProcesses, rowsPerSlave);
-				LOG.info("Created and loaded table in " + ((System.currentTimeMillis() - startTime)/1000) + " seconds.");
+				LOG.debug("Created and loaded table in " + ((System.currentTimeMillis() - startTime)/1000) + " seconds.");
 			} catch (SQLException e) {
 				if(e.getErrorCode()==955) {
-					LOG.info("Table already exists - using existing data");
+					LOG.debug("Table already exists - using existing data");
 				} else {
 					throw new RuntimeException(e);
 				}
@@ -330,9 +331,9 @@ public abstract class OraOopTestCase {
 	}
 
 	protected void cleanupFolders() throws Exception {
-		HadoopFiles.deleteFolder(getSqoopTargetDirectory());
-		HadoopFiles.deleteFolder(new File(getSqoopGenSrcDirectory()).toURI().toURL().toString());
-		HadoopFiles.deleteFolder(new File(getSqoopGenLibDirectory()).toURI().toURL().toString());
+	  HadoopFiles.delete(new Path(getSqoopTargetDirectory()), true);
+		HadoopFiles.delete(new Path(getSqoopGenSrcDirectory()), true);
+		HadoopFiles.delete(new Path(getSqoopGenLibDirectory()), true);
 	}
 
 }

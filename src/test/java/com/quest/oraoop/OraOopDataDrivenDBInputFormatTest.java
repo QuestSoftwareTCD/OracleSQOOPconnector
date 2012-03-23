@@ -46,7 +46,6 @@ public class OraOopDataDrivenDBInputFormatTest extends OraOopTestCase {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testgroupTableDataChunksIntoSplits() {
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
 		
 		List<OraOopOracleDataChunk> dataChunks = new ArrayList<OraOopOracleDataChunk>();
 		
@@ -99,8 +98,6 @@ public class OraOopDataDrivenDBInputFormatTest extends OraOopTestCase {
 					 	 				"only has %s of the workload of the 'largest' split."
 					 	 				,minExpectedWorkloadRatio
 					 	 				,actualWorkloadRatio));
-		
-		 System.out.println("Finished");		 
 	}
 
 }

@@ -38,12 +38,8 @@ public class ITOracleConnectionFactory extends OraOopTestCase {
 	
 	@Test
 	public void testSetJdbcFetchSize() {
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
-		
 		setAndCheckJdbcFetchSize(45);
 		setAndCheckJdbcFetchSize(2000);
-		
-		System.out.println("Finished");
 	}	
 		
 	private void setAndCheckJdbcFetchSize(int jdbcFetchSize) {
@@ -104,8 +100,6 @@ public class ITOracleConnectionFactory extends OraOopTestCase {
 	@Test
 	public void testCreateOracleJdbcConnection_BadUserName() {
 		
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
-		
 		try {
 			
 			// Prevent createOracleJdbcConnection() from logging a problem with the
@@ -125,14 +119,10 @@ public class ITOracleConnectionFactory extends OraOopTestCase {
 		catch(SQLException ex) {
 			assertEquals(ex.getErrorCode(), 1017); //<- ORA-01017 invalid username/password; logon denied.
 		}
-		
-		System.out.println("Finished");		
 	}	
 
 	@Test
 	public void testCreateOracleJdbcConnection_BadPassword() {
-		
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));		
 
 		try {
 			// Prevent createOracleJdbcConnection() from logging a problem with the
@@ -151,14 +141,10 @@ public class ITOracleConnectionFactory extends OraOopTestCase {
 		catch(SQLException ex) {
 			assertEquals(ex.getErrorCode(), 1017); //<- ORA-01017 invalid username/password; logon denied.
 		}
-		
-		System.out.println("Finished");		
 	}		
 
 	@Test
 	public void testCreateOracleJdbcConnection_Ok() {
-		
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));		
 
 		try {
 			Connection conn = getConnection();
@@ -172,14 +158,10 @@ public class ITOracleConnectionFactory extends OraOopTestCase {
 		catch(SQLException ex) {
 			Assert.fail(ex.getMessage());
 		}
-		
-		System.out.println("Finished");		
-	}		
+	}
 	
 	@Test 
 	public void testExecuteOraOopSessionInitializationStatements() {
-		
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));		
 		
 		//Exposer.LOG = null;
 		//protected static final Log LOG = LogFactory.getLog(OracleConnectionFactory.class.getName());
@@ -233,14 +215,10 @@ public class ITOracleConnectionFactory extends OraOopTestCase {
 		catch(Exception ex) {
 			Assert.fail(ex.getMessage());
 		}
-		
-		System.out.println("Finished");		
 	}
 	
 	@Test 
 	public void testParseOraOopSessionInitializationStatements() {
-		
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
 		
 		List<String> statements = null; 
 		
@@ -318,7 +296,6 @@ public class ITOracleConnectionFactory extends OraOopTestCase {
 		if(!actual.equalsIgnoreCase(expected))
 			Assert.fail(String.format("Expected a session initialization statement of \"%s\", but got \"%s\".", expected, actual));
 	
-		System.out.println("Finished");
 	}
 	
 	private void dropTable(Connection conn, String tableName) {
@@ -377,8 +354,6 @@ public class ITOracleConnectionFactory extends OraOopTestCase {
 	@Test
 	public void testSetSessionClientInfo() {
 		
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
-		
 		Connection conn = getConnection();
 		
 		org.apache.hadoop.conf.Configuration conf = new Configuration();
@@ -419,7 +394,6 @@ public class ITOracleConnectionFactory extends OraOopTestCase {
 			Assert.fail(ex.getMessage());
 		}
 		
-		System.out.println("Finished");
 	}
 	
 	private Connection getConnection() {

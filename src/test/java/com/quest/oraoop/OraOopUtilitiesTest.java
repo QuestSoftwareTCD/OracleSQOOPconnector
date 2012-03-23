@@ -41,8 +41,6 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 	@Test
 	public void testdecodeOracleTableName() {
 		
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
-		
 		//org.apache.hadoop.conf.Configuration conf = new Configuration();
 
 		OracleTable context = null; 
@@ -100,27 +98,20 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 		context = OraOopUtilities.decodeOracleTableName("oraoop", "\"targ.usr\".\"junk.tab.with.dots\"", null);
 		Assert.assertEquals(context.getSchema(), "targ.usr");
 		Assert.assertEquals(context.getName(), "junk.tab.with.dots");
-		
-		System.out.println("Finished");
 	}
 
 	@Test
 	public void testgetCurrentMethodName() {
 		
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
-		
 		String actual = OraOopUtilities.getCurrentMethodName();
 		String expected = "testgetCurrentMethodName()";
-		
+
 		Assert.assertEquals(expected, actual);
-		
-		System.out.println("Finished");
+
 	}	
 	
 	@Test
 	public void testgenerateDataChunkId() {
-
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
 		
 		String expected;
 		String actual;
@@ -132,14 +123,10 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 		expected = "1234_99";
 		actual = OraOopUtilities.generateDataChunkId(1234, 99);
 		Assert.assertEquals(expected, actual);			
-				
-		System.out.println("Finished");
 	}	
 	
 	@Test
 	public void testgetDuplicatedStringArrayValues() {
-
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
 		
 		try {
 			OraOopUtilities.getDuplicatedStringArrayValues(null, false);
@@ -181,14 +168,10 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 		Assert.assertEquals(2, duplicates.length);
 		Assert.assertEquals("a", duplicates[0]);			
 		Assert.assertEquals("A", duplicates[1]);
-		
-		System.out.println("Finished");
 	}
 	
 	@Test
 	public void testgetFullExceptionMessage() {
-		
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
 		
 		try {
 			
@@ -217,8 +200,6 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 			   !msg.contains("consectetur adipisicing elit"))
 				Assert.fail("Outer exception text has not been included in the message");				
 		}
-		
-		System.out.println("Finished");
 	}
 	
 	@Test
@@ -256,8 +237,6 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 	
 	@Test
 	public void testgetOraOopOracleBlockToSplitAllocationMethod() {
-
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
 		
 		// Invalid arguments test...
 		try {
@@ -296,14 +275,10 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 		conf.set(OraOopConstants.ORAOOP_ORACLE_BLOCK_TO_SPLIT_ALLOCATION_METHOD, "sequential");		
 		allocationMethod = OraOopUtilities.getOraOopOracleBlockToSplitAllocationMethod(conf, OraOopConstants.OraOopOracleBlockToSplitAllocationMethod.SEQUENTIAL);
 		Assert.assertEquals(OraOopConstants.OraOopOracleBlockToSplitAllocationMethod.SEQUENTIAL, allocationMethod);
-		
-		System.out.println("Finished");
 	}
 	
 	@Test
 	public void testgetOraOopTableImportWhereClauseLocation() {
-
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
 		
 		// Invalid arguments test...
 		try {
@@ -338,14 +313,11 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 		conf.set(OraOopConstants.ORAOOP_TABLE_IMPORT_WHERE_CLAUSE_LOCATION, "split");		
 		location = OraOopUtilities.getOraOopTableImportWhereClauseLocation(conf, OraOopConstants.OraOopTableImportWhereClauseLocation.SUBSPLIT);
 		Assert.assertEquals(OraOopConstants.OraOopTableImportWhereClauseLocation.SPLIT, location);
-		
-		System.out.println("Finished");
+
 	}	
 	
 	@Test
 	public void testpadLeft() {
-		
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
 		
 		String expected = "   a";
 		String actual = OraOopUtilities.padLeft("a", 4);
@@ -353,15 +325,11 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 		
 		expected = "abcd";
 		actual = OraOopUtilities.padLeft("abcd", 3);
-		Assert.assertEquals(expected, actual);		
-		
-		System.out.println("Finished");
+		Assert.assertEquals(expected, actual);
 	}
 	
 	@Test
 	public void testpadRight() {
-		
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
 		
 		String expected = "a   ";
 		String actual = OraOopUtilities.padRight("a", 4);
@@ -370,14 +338,10 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 		expected = "abcd";
 		actual = OraOopUtilities.padRight("abcd", 3);
 		Assert.assertEquals(expected, actual);		
-		
-		System.out.println("Finished");
 	}	
 	
 	@Test
 	public void testReplaceConfigurationExpression() {
-		
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
 		
 		org.apache.hadoop.conf.Configuration conf = new Configuration();
 		
@@ -404,14 +368,10 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 		actual = OraOopUtilities.replaceConfigurationExpression("set {expr4|0}={expr5|5};", conf);
 		expected = "set 4=5;";
 		Assert.assertEquals("OraOop configuration expression failure.", expected, actual);
-		
-		System.out.println("Finished");
 	}	
 	
 	@Test
 	public void testStackContainsClass() {
-		
-		System.out.print(String.format("\t%s - Start...", OraOopUtilities.getCurrentMethodName()));
 		
 		if(OraOopUtilities.stackContainsClass("lorem.ipsum.dolor"))
 			Assert.fail("There's no way the stack actually contains this!");
@@ -419,8 +379,6 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 		String expected = "com.quest.oraoop.OraOopUtilitiesTest";
 		if(!OraOopUtilities.stackContainsClass(expected))
 			Assert.fail("The stack should contain the class:" + expected);
-		
-		System.out.println("Finished");
 	}
 	
 	@Test

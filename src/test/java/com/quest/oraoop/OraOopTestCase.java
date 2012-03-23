@@ -18,6 +18,7 @@ package com.quest.oraoop;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -27,8 +28,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import junit.framework.Assert;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.log4j.Layout;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.WriterAppender;
 
 import com.cloudera.sqoop.Sqoop;
 import com.quest.oraoop.test.HadoopFiles;
@@ -149,6 +158,38 @@ public abstract class OraOopTestCase {
 		}
 	}
 	
+	protected int countTable(String tableName, String[] partitionList) {
+	  String sql = null;
+	  int numRows = 0;
+	  if(partitionList!=null&&partitionList.length>0) {
+	    sql = "SELECT sum(cnt) FROM (";
+	    int i = 0;
+	    for(String partition : partitionList) {
+	      i++;
+	      if (i>1) {
+	        sql += " UNION ALL ";
+	      }
+	      sql += "SELECT count(*) cnt FROM " + tableName + " PARTITION(" + partition + ")";
+	    }
+	    sql += ")";
+	  } else {
+	    sql = "SELECT count(*) FROM " + tableName;
+	  }
+	  try
+    {
+      PreparedStatement stmt = this.getTestEnvConnection().prepareStatement(sql);
+      stmt.execute();
+      ResultSet results = stmt.getResultSet();
+      results.next();
+      numRows = results.getInt(1);
+    }
+    catch(SQLException e)
+    {
+      throw new RuntimeException("Could not count number of rows in table " + tableName,e);
+    }
+	  return numRows;
+	}
+	
 	protected Configuration getSqoopConf() {
 		Configuration sqoopConf = new Configuration();
 		sqoopConf.set("sqoop.connection.factories","com.quest.oraoop.OraOopManagerFactory");
@@ -167,6 +208,13 @@ public abstract class OraOopTestCase {
 	}
 
 	protected int runImport(String tableName, boolean sequenceFile, OraOopConstants.OraOopOracleDataChunkMethod dataChunkMethod, String partitionList) {
+	  Logger rootLogger = Logger.getRootLogger();
+	  rootLogger.removeAllAppenders();
+	  StringWriter stringWriter = new StringWriter();
+	  Layout layout = new PatternLayout("%d{yy/MM/dd HH:mm:ss} %p %c{2}: %m%n");
+	  WriterAppender writerAppender = new WriterAppender(layout, stringWriter);
+	  rootLogger.addAppender(writerAppender);
+	  
 		List<String> sqoopArgs = new ArrayList<String>();
 
 		sqoopArgs.add("import");
@@ -211,7 +259,20 @@ public abstract class OraOopTestCase {
 		  sqoopConf.set(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST, partitionList);
 		}
 		
-		return Sqoop.runTool(sqoopArgs.toArray(new String[sqoopArgs.size()]),sqoopConf);
+		int rowsInTable = countTable(tableName, sqoopConf.getStrings(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST));
+		
+		int retCode = Sqoop.runTool(sqoopArgs.toArray(new String[sqoopArgs.size()]),sqoopConf);
+		int rowsImported = 0;
+		if(retCode==0) {
+		  String logString = stringWriter.toString();
+		  Pattern pattern = Pattern.compile("(INFO mapreduce.ImportJobBase: Retrieved )([0-9]+)( records.)");
+		  Matcher matcher = pattern.matcher(logString);
+		  while(matcher.find()) {
+		    rowsImported = Integer.parseInt(matcher.group(2));
+		  }
+		}
+		Assert.assertEquals("Incorrect number of rows imported", rowsInTable, rowsImported);
+		return retCode;
 	}
 	
 	protected int runExportFromTemplateTable(String templateTableName, String tableName) {

@@ -76,7 +76,7 @@ public class ITImport extends OraOopTestCase {
     createTable("table_tst_product_part.xml");
     
     try {
-      int retCode = runImport("tst_product_part", false, OraOopOracleDataChunkMethod.ROWID, "TST_PRODUCT_PART_1,TST_PRODUCT_PART_2,TST_PRODUCT_PART_3");
+      int retCode = runImport("tst_product_part", false, OraOopOracleDataChunkMethod.ROWID, "tst_product_part_1,tst_product_part_2,\"tst_product_pa#rt_6\"");
       Assert.assertEquals("Return code should be 0", 0,retCode);
       
     } finally {
@@ -91,7 +91,7 @@ public class ITImport extends OraOopTestCase {
     createTable("table_tst_product_part.xml");
     
     try {
-      int retCode = runImport("tst_product_part", false, OraOopConstants.OraOopOracleDataChunkMethod.PARTITION, "TST_PRODUCT_PART_1,TST_PRODUCT_PART_2,TST_PRODUCT_PART_3,TST_PRODUCT_PART_4");
+      int retCode = runImport("tst_product_part", false, OraOopConstants.OraOopOracleDataChunkMethod.PARTITION, "tst_product_part_1,tst_product_part_2,tst_product_part_3,\"tst_product_pa#rt_6\"");
       Assert.assertEquals("Return code should be 0", 0,retCode);
       
     } finally {

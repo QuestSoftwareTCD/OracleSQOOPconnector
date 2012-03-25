@@ -216,15 +216,12 @@ public class OraOopDataDrivenDBInputFormat<T extends DBWritable> extends DataDri
     }
     
     private List<String> getPartitionList(JobContext jobContext) {
-      String[] partitionListArr = jobContext.getConfiguration().getStrings(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST);
-      List<String> partitionList = null;
-      if(partitionListArr!=null && partitionListArr.length>0) {
-        partitionList = new ArrayList<String>(partitionListArr.length);
-        for (String partition : partitionListArr) {
-          partitionList.add(partition);
-        }
+      LOG.debug(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST + " = " + jobContext.getConfiguration().get(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST));
+      List<String> result = OraOopUtilities.splitOracleStringList(jobContext.getConfiguration().get(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST));
+      if(result!=null && result.size()>0) {
+        LOG.debug("Partition filter list: " + result.toString());
       }
-      return partitionList;
+      return result;
     }
 
     protected List<InputSplit> groupTableDataChunksIntoSplits(List<? extends OraOopOracleDataChunk> dataChunks, int desiredNumberOfSplits, OraOopConstants.OraOopOracleBlockToSplitAllocationMethod blockAllocationMethod) {

@@ -18,6 +18,8 @@ package com.quest.oraoop;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Assert;
 
@@ -400,5 +402,106 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 		hint = OraOopUtilities.getImportHint(conf);
 		Assert.assertEquals("Blank import hint","", hint);
 
+	}
+	
+	@Test
+	public void testSplitStringList() {
+	  List<String> result = null;
+	  List<String> expected = null;
+
+	  expected = new ArrayList<String>();
+	  expected.add("abcde");
+	  expected.add("ghijklm");
+	  result = OraOopUtilities.splitStringList("abcde,ghijklm");
+	  Assert.assertEquals(expected, result);
+
+	  expected = new ArrayList<String>();
+	  expected.add("\"abcde\"");
+	  expected.add("\"ghijklm\"");
+	  result = OraOopUtilities.splitStringList("\"abcde\",\"ghijklm\"");
+	  Assert.assertEquals(expected, result);
+
+	  expected = new ArrayList<String>();
+	  expected.add("abcde");
+	  expected.add("\"ghijklm\"");
+	  result = OraOopUtilities.splitStringList("abcde,\"ghijklm\"");
+	  Assert.assertEquals(expected, result);
+
+	  expected = new ArrayList<String>();
+	  expected.add("\"abcde\"");
+	  expected.add("ghijklm");
+	  result = OraOopUtilities.splitStringList("\"abcde\",ghijklm");
+	  Assert.assertEquals(expected, result);
+
+	  expected = new ArrayList<String>();
+	  expected.add("\"ab,cde\"");
+	  expected.add("ghijklm");
+	  result = OraOopUtilities.splitStringList("\"ab,cde\",ghijklm");
+	  Assert.assertEquals(expected, result);
+
+	  expected = new ArrayList<String>();
+	  expected.add("abcde");
+	  expected.add("\"ghi,jklm\"");
+	  result = OraOopUtilities.splitStringList("abcde,\"ghi,jklm\"");
+	  Assert.assertEquals(expected, result);
+
+	  expected = new ArrayList<String>();
+	  expected.add("\"ab,cde\"");
+	  expected.add("\"ghi,jklm\"");
+	  result = OraOopUtilities.splitStringList("\"ab,cde\",\"ghi,jklm\"");
+	  Assert.assertEquals(expected, result);
+
+	  expected = new ArrayList<String>();
+	  expected.add("\"ab,cde\"");
+	  expected.add("\"ghi,jklm\"");
+	  expected.add("\",Lorem\"");
+	  expected.add("\"ip!~sum\"");
+	  expected.add("\"do,lo,,r\"");
+	  expected.add("\"s#it\"");
+	  expected.add("\"am$e$t\"");
+	  result = OraOopUtilities.splitStringList("\"ab,cde\",\"ghi,jklm\",\",Lorem\",\"ip!~sum\",\"do,lo,,r\",\"s#it\",\"am$e$t\"");
+	  Assert.assertEquals(expected, result);
+
+	  expected = new ArrayList<String>();
+	  expected.add("LOREM");
+	  expected.add("IPSUM");
+	  expected.add("DOLOR");
+	  expected.add("SIT");
+	  expected.add("AMET");
+	  result = OraOopUtilities.splitStringList("LOREM,IPSUM,DOLOR,SIT,AMET");
+	  Assert.assertEquals(expected, result);
+	}
+
+	@Test
+	public void testSplitOracleStringList() {
+	  List<String> result = null;
+	  List<String> expected = null;
+
+	  expected = new ArrayList<String>();
+	  expected.add("LOREM");
+	  expected.add("IPSUM");
+	  expected.add("DOLOR");
+	  expected.add("SIT");
+	  expected.add("AMET");
+	  result = OraOopUtilities.splitOracleStringList("lorem,ipsum,dolor,sit,amet");
+	  Assert.assertEquals(expected, result);
+
+	  expected = new ArrayList<String>();
+	  expected.add("LOREM");
+	  expected.add("ipsum");
+	  expected.add("dolor");
+	  expected.add("SIT");
+	  expected.add("amet");
+	  result = OraOopUtilities.splitOracleStringList("lorem,\"ipsum\",\"dolor\",sit,\"amet\"");
+	  Assert.assertEquals(expected, result);
+
+	  expected = new ArrayList<String>();
+	  expected.add("LOREM");
+	  expected.add("ip,sum");
+	  expected.add("dol$or");
+	  expected.add("SIT");
+	  expected.add("am!~#et");
+	  result = OraOopUtilities.splitOracleStringList("lorem,\"ip,sum\",\"dol$or\",sit,\"am!~#et\"");
+	  Assert.assertEquals(expected, result);
 	}
 }

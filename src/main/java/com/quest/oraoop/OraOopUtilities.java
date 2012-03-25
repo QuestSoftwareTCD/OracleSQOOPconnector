@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -1139,6 +1141,46 @@ public class OraOopUtilities {
         
         String updateKey = conf.get(ExportJobBase.SQOOP_EXPORT_UPDATE_COL_KEY);
         return getExtraExportUpdateKeyColumnNames(updateKey, conf);
+    }
+    
+    /**
+     * Splits a string separated by commas - the elements can be optionally enclosed in quotes - this allows the elements to have commas in them.
+     * @param value The String to be split
+     * @return A list of values
+     */
+    public static List<String> splitStringList(String value) {
+      List<String> result = new ArrayList<String>();
+      if(value!=null && !value.isEmpty()) {
+        Pattern pattern = Pattern.compile("([^\",]*|\"[^\"]*\")(,|$)");
+        Matcher matcher = pattern.matcher(value);
+        while(matcher.find()) {
+          if(matcher.group(1)!=null && !matcher.group(1).isEmpty()) {
+            result.add(matcher.group(1));
+          }
+        }
+      }
+      return result;
+    }
+
+    /**
+     * Splits a string list separated by commas. If the element is not surrounded by quotes it will be return in upper case.
+     * If the element is enclosed in quotes it will be returned in the same case and special characters will be retained.
+     * @param value The String to be split
+     * @return A list of values
+     */
+    public static List<String> splitOracleStringList(String value) {
+      List<String> result = new ArrayList<String>();
+      List<String> splitValue = splitStringList(value);
+      Pattern pattern = Pattern.compile("(\")([^\"]*)(\")");
+      for(String element : splitValue) {
+        Matcher matcher = pattern.matcher(element);
+        if(matcher.find()) {
+          result.add(matcher.group(2));
+        } else {
+          result.add(element.toUpperCase());
+        }
+      }
+      return result;
     }
     
     private static String[] getExtraExportUpdateKeyColumnNames(String updateKey, org.apache.hadoop.conf.Configuration conf) {

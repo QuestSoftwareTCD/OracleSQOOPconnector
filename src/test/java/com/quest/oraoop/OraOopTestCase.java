@@ -159,10 +159,10 @@ public abstract class OraOopTestCase {
 		}
 	}
 	
-	protected int countTable(String tableName, String[] partitionList) {
+	protected int countTable(String tableName, List<String> partitionList) {
 	  String sql = null;
 	  int numRows = 0;
-	  if(partitionList!=null&&partitionList.length>0) {
+	  if(partitionList!=null&&partitionList.size()>0) {
 	    sql = "SELECT sum(cnt) FROM (";
 	    int i = 0;
 	    for(String partition : partitionList) {
@@ -170,7 +170,7 @@ public abstract class OraOopTestCase {
 	      if (i>1) {
 	        sql += " UNION ALL ";
 	      }
-	      sql += "SELECT count(*) cnt FROM " + tableName + " PARTITION(" + partition + ")";
+	      sql += "SELECT count(*) cnt FROM " + tableName + " PARTITION(\"" + partition + "\")";
 	    }
 	    sql += ")";
 	  } else {
@@ -260,7 +260,7 @@ public abstract class OraOopTestCase {
 		  sqoopConf.set(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST, partitionList);
 		}
 		
-		int rowsInTable = countTable(tableName, sqoopConf.getStrings(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST));
+		int rowsInTable = countTable(tableName, OraOopUtilities.splitOracleStringList(sqoopConf.get(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST)));
 		
 		int retCode = Sqoop.runTool(sqoopArgs.toArray(new String[sqoopArgs.size()]),sqoopConf);
 		int rowsImported = 0;

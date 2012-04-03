@@ -26,6 +26,16 @@
     <hadoop.conf.dir>${env.HADOOP_CONF_DIR}</hadoop.conf.dir>
   </properties>
 
+  <scm>
+  	<connection>scm:git:https://github.com/QuestSoftwareTCD/OracleSQOOPconnector.git</connection>
+  	<developerConnection>scm:git:git@github.com:QuestSoftwareTCD/OracleSQOOPconnector.git</developerConnection>
+  	<url>https://github.com/QuestSoftwareTCD/OracleSQOOPconnector</url>
+  </scm>
+  <issueManagement>
+  	<system>JIRA</system>
+  	<url>https://questmos.jira.com/browse/ORAOOP</url>
+  </issueManagement>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

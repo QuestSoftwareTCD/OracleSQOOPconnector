@@ -1,5 +1,5 @@
 /**
- *   Copyright 2011 Quest Software, Inc.
+ *   Copyright 2012 Quest Software, Inc.
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -622,7 +622,7 @@ public class OraOopManagerFactory extends ManagerFactory {
         String msg1 = String.format("Using %s %s"
                                    ,OraOopConstants.ORAOOP_PRODUCT_NAME
                                    ,OraOopUtilities.getOraOopVersion());
-        String msg2 = "Copyright 2011 Quest Software, Inc.";
+        String msg2 = "Copyright 2012 Quest Software, Inc.";
         String msg3 = "ALL RIGHTS RESERVED.";
 
         int longestMessage = Math.max(msg1.length(), msg2.length());

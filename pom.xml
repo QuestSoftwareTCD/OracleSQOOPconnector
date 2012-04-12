@@ -189,4 +189,17 @@
       <url>https://repository.cloudera.com/artifactory/repo</url>
     </repository>
   </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>quest-libs-release</id>
+      <name>quest-libs-release</name>
+      <url>${dist.release.url}</url>
+    </repository>
+    <snapshotRepository>
+      <id>quest-libs-snapshot</id>
+      <name>quest-libs-snapshot</name>
+      <url>${dist.snapshot.url}</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>

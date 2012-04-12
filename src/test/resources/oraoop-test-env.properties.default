@@ -4,7 +4,7 @@ systemtest_table_name=oraoop_test
 systemtest_num_rows=100
 
 # Oracle JDBC connection string
-oracle_url=jdbc:oracle:thin:@//localhost:1521/orcl
+oracle_url=${oracle.jdbc.url}
 # Oracle user name
 oracle_username=oraoop
 # Oracle password - NOTE: for unit tests we will append "a" to the start of this password to ensure we can't login with an invalid password 

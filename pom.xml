@@ -176,7 +176,6 @@
           <tagNameFormat>@{project.version}</tagNameFormat>
           <useReleaseProfile>false</useReleaseProfile>
           <arguments>-Doracle.jdbc.url="${oracle.jdbc.url}" -Dhadoop.conf.dir="${hadoop.conf.dir}"</arguments>
-          <goals>install</goals>
         </configuration>
       </plugin>
     </plugins>

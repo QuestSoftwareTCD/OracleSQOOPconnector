@@ -138,7 +138,7 @@ public class OraOopOracleQueries {
 	  String sql = "SELECT " +
 			"  pl.partition_name, " +
 			"  pl.is_subpartition, " +
-			"  SUM(blocks) blocks " +
+			"  s.blocks " +
 			"FROM " +
 			"  (SELECT tp.table_owner, " +
 			"    tp.table_name, " +
@@ -158,14 +158,10 @@ public class OraOopOracleQueries {
 	  }
 	  
 			sql += "  ) pl, " +
-			"  dba_extents e " +
-			"WHERE e.owner       =pl.table_owner " +
-			"AND e.segment_name  =pl.table_name " +
-			"AND e.partition_name=pl.partition_name " +
-			"GROUP BY pl.table_owner, " +
-			"  pl.table_name, " +
-			"  pl.partition_name, " +
-			"  pl.is_subpartition";
+			"  dba_segments s " +
+			"WHERE s.owner       =pl.table_owner " +
+			"AND s.segment_name  =pl.table_name " +
+			"AND s.partition_name=pl.partition_name ";
 	  
 	  OraclePreparedStatement statement = (OraclePreparedStatement) connection.prepareStatement(sql);
 	  statement.setStringAtName("table_owner", table.getSchema());

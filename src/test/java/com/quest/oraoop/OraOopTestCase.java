@@ -272,6 +272,9 @@ public abstract class OraOopTestCase {
 		    rowsImported = Integer.parseInt(matcher.group(2));
 		  }
 		}
+		if(retCode!=0 || rowsInTable!=rowsImported) {
+		  System.out.println(stringWriter.toString());
+		}
 		Assert.assertEquals("Incorrect number of rows imported", rowsInTable, rowsImported);
 		return retCode;
 	}

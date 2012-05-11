@@ -90,18 +90,18 @@ public class OracleTableDefinition {
 				}
 			}
 			
-			NodeList primaryKeyColumns = table.getElementsByTagName("primaryKeyColumn");
-			for (int i = 0; i < primaryKeyColumns.getLength(); i++) {
-				Node primaryKeyColumnNode = primaryKeyColumns.item(i);
+			NodeList primaryKeyColumnsNodeList = table.getElementsByTagName("primaryKeyColumn");
+			for (int i = 0; i < primaryKeyColumnsNodeList.getLength(); i++) {
+				Node primaryKeyColumnNode = primaryKeyColumnsNodeList.item(i);
 				if (primaryKeyColumnNode.getNodeType() == Node.ELEMENT_NODE) {
 					Element primaryKeyColumnElement = (Element) primaryKeyColumnNode;
 					this.primaryKeyColumns.add(primaryKeyColumnElement.getChildNodes().item(0).getNodeValue());
 				}
 			}
 			
-			NodeList uniqueKeyColumns = table.getElementsByTagName("uniqueKeyColumn");
-			for (int i = 0; i < uniqueKeyColumns.getLength(); i++) {
-				Node uniqueKeyColumnNode = uniqueKeyColumns.item(i);
+			NodeList uniqueKeyColumnsNodeList = table.getElementsByTagName("uniqueKeyColumn");
+			for (int i = 0; i < uniqueKeyColumnsNodeList.getLength(); i++) {
+				Node uniqueKeyColumnNode = uniqueKeyColumnsNodeList.item(i);
 				if (uniqueKeyColumnNode.getNodeType() == Node.ELEMENT_NODE) {
 					Element uniqueKeyColumnElement = (Element) uniqueKeyColumnNode;
 					this.uniqueKeyColumns.add(uniqueKeyColumnElement.getChildNodes().item(0).getNodeValue());

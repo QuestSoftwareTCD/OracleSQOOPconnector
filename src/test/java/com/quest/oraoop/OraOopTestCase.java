@@ -16,7 +16,6 @@
 
 package com.quest.oraoop;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URL;
@@ -48,13 +47,13 @@ import oracle.jdbc.OracleConnection;
 
 public abstract class OraOopTestCase {
 	
-	protected static OraOopLog LOG = OraOopLogFactory.getLog(OraOopTestCase.class.getName());
+	private static OraOopLog LOG = OraOopLogFactory.getLog(OraOopTestCase.class.getName());
 	
 	private String sqoopGenLibDirectory = System.getProperty("user.dir") + "/target/tmp/lib";
 	private String sqoopGenSrcDirectory = System.getProperty("user.dir") + "/target/tmp/src";
 	private String sqoopTargetDirectory = "target/tmp/";
 	
-	protected OracleConnection conn;
+	private OracleConnection conn;
 	
 	protected ClassLoader classLoader;
 	{
@@ -140,12 +139,12 @@ public abstract class OraOopTestCase {
 	
 	protected void createTable(String fileName) {
 		try {
-			OracleConnection conn = getTestEnvConnection();
-			int parallelProcesses = OracleData.getParallelProcesses(conn);
+			OracleConnection localConn = getTestEnvConnection();
+			int parallelProcesses = OracleData.getParallelProcesses(localConn);
 			int rowsPerSlave = Integer.valueOf(getTestEnvProperty("it_num_rows")) / parallelProcesses;
 			try {
 				long startTime = System.currentTimeMillis();
-				OracleData.createTable(conn, fileName, parallelProcesses, rowsPerSlave);
+				OracleData.createTable(localConn, fileName, parallelProcesses, rowsPerSlave);
 				LOG.debug("Created and loaded table in " + ((System.currentTimeMillis() - startTime)/1000) + " seconds.");
 			} catch (SQLException e) {
 				if(e.getErrorCode()==955) {
@@ -318,9 +317,9 @@ public abstract class OraOopTestCase {
 		return Sqoop.runTool(sqoopArgs.toArray(new String[sqoopArgs.size()]),sqoopConf);
 	}
 	
-	protected int runCompareTables(Connection conn, String table1, String table2) throws SQLException {
+	protected int runCompareTables(Connection connection, String table1, String table2) throws SQLException {
 		PreparedStatement stmt;
-		stmt = conn.prepareStatement("select count(*) from (select * from (select * from " +
+		stmt = connection.prepareStatement("select count(*) from (select * from (select * from " +
 		                                                                       table1 +
 		                                                                       " minus select * from " +
 		                                                                       table2 +

@@ -504,4 +504,30 @@ public class OraOopUtilitiesTest extends OraOopTestCase {
 	  result = OraOopUtilities.splitOracleStringList("lorem,\"ip,sum\",\"dol$or\",sit,\"am!~#et\"");
 	  Assert.assertEquals(expected, result);
 	}
+	
+	@Test
+	public void testAppendJavaSecurityEgd() {
+	  String confProperty = "mapred.child.java.opts";
+	  String confValue = "-Djava.security.egd=file:///dev/urandom";
+	  Configuration conf = new Configuration();
+	  
+	  String expected = confValue;
+	  String actual = null;
+	  conf.set(confProperty, "");
+	  OraOopUtilities.appendJavaSecurityEgd(conf);
+	  actual = conf.get(confProperty);
+	  Assert.assertEquals("Append to empty string", expected, actual);
+	  
+	  expected = "-Djava.security.egd=file:/dev/random";
+	  conf.set(confProperty, expected);
+	  OraOopUtilities.appendJavaSecurityEgd(conf);
+    actual = conf.get(confProperty);
+    Assert.assertEquals("Append to empty string", expected, actual);
+	  
+	  expected = confValue + " -Xmx201m";
+	  conf.set(confProperty, "-Xmx201m");
+	  OraOopUtilities.appendJavaSecurityEgd(conf);
+	  actual = conf.get(confProperty);
+	  Assert.assertEquals("Append to empty string", expected, actual);
+	}
 }

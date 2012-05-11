@@ -41,8 +41,8 @@ public class OraOopDataDrivenDBInputFormat<T extends DBWritable> extends DataDri
     public static final OraOopLog LOG = OraOopLogFactory.getLog(OraOopDataDrivenDBInputFormat.class.getName());
 
     public OraOopDataDrivenDBInputFormat() {
-
         super();
+        OraOopUtilities.checkJavaSecurityEgd();
     }
 
     @Override

@@ -38,7 +38,7 @@ public class OraOopOutputFormatInsert<K extends SqoopRecord, V>
     
     @Override
     public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context) throws IOException {
-
+        OraOopUtilities.checkJavaSecurityEgd();
         Configuration conf = context.getConfiguration();
         
         int mapperId = this.getMapperId(context);

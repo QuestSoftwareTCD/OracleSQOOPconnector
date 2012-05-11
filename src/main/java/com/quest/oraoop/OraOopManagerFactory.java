@@ -173,6 +173,8 @@ public class OraOopManagerFactory extends ManagerFactory {
                     // Generate the "action" name that we'll assign to our Oracle sessions
                     // so that the user knows which Oracle sessions belong to OraOop...
                     sqoopOptions.getConf().set(OraOopConstants.ORACLE_SESSION_ACTION_NAME, getOracleSessionActionName(jobData));
+                    
+                    OraOopUtilities.appendJavaSecurityEgd(sqoopOptions.getConf());
 
                     // Get the Oracle database version...
                     try {

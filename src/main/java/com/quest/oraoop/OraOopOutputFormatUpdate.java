@@ -41,7 +41,7 @@ public class OraOopOutputFormatUpdate<K extends SqoopRecord, V>
     
     @Override
     public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context) throws IOException {
-        
+        OraOopUtilities.checkJavaSecurityEgd();
         Configuration conf = context.getConfiguration();
         
         // Get the unique JDBC URL to use for this mapper and update the configuration property

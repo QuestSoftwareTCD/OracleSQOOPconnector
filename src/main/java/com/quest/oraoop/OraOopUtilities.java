@@ -1261,4 +1261,24 @@ public class OraOopUtilities {
     	return result;
     }
     
+    public static void appendJavaSecurityEgd(Configuration conf) {
+      String mapredJavaOpts = conf.get("mapred.child.java.opts");
+      if(mapredJavaOpts==null || !mapredJavaOpts.contains("-Djava.security.egd")) {
+        StringBuilder newMapredJavaOpts = new StringBuilder("-Djava.security.egd=file:///dev/urandom");
+        if(mapredJavaOpts!=null && !mapredJavaOpts.isEmpty()) {
+          newMapredJavaOpts.append(" ").append(mapredJavaOpts);
+        }
+        String newMapredJavaOptsString = newMapredJavaOpts.toString();
+        conf.set("mapred.child.java.opts", newMapredJavaOptsString);
+        LOG.debug("Updated mapred.child.java.opts from \"" + mapredJavaOpts + "\" to \"" + newMapredJavaOptsString + "\"");
+      }
+    }
+    
+    public static void checkJavaSecurityEgd() {
+      String javaSecurityEgd = System.getProperty("java.security.egd");
+      if(!"file:///dev/urandom".equals(javaSecurityEgd)) {
+        LOG.warn("System property java.security.egd is not set to file:///dev/urandom - Oracle connections may time out.");
+      }
+    }
+    
 }

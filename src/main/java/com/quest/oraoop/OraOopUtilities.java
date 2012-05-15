@@ -42,6 +42,7 @@ import org.apache.log4j.Logger;
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.mapreduce.ExportJobBase;
+import com.cloudera.sqoop.util.Jars;
 import com.quest.oraoop.OraOopOutputFormatInsert.InsertMode;
 import com.quest.oraoop.OraOopOutputFormatUpdate.UpdateMode;
 
@@ -374,15 +375,6 @@ public class OraOopUtilities {
         return result.toString();
     }
 
-    public static String getOraOopJarFile() {
-
-        Path jarFilePath = new Path(OraOopUtilities.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-        String result = jarFilePath.toUri().getPath();
-        if (!result.endsWith(".jar"))
-            result = result + Path.SEPARATOR_CHAR + OraOopConstants.ORAOOP_JAR_FILENAME;
-        return result;
-    }
-
     public static OraOopConstants.OraOopTableImportWhereClauseLocation getOraOopTableImportWhereClauseLocation(org.apache.hadoop.conf.Configuration conf, OraOopConstants.OraOopTableImportWhereClauseLocation defaultLocation) {
 
         if (conf == null)
@@ -433,8 +425,8 @@ public class OraOopUtilities {
 
         final String IMPLEMENTATION_VERSION = "Implementation-Version";
 
-        String jarFileName = getOraOopJarFile();
         try {
+            String jarFileName = Jars.getJarPathForClass(OraOopUtilities.class);
             JarFile jar = new JarFile(jarFileName);
             Manifest mf = jar.getManifest();
             Attributes at = mf.getMainAttributes();
@@ -444,7 +436,7 @@ public class OraOopUtilities {
 
             return result;
         }
-        catch (IOException ex) {
+        catch (Exception ex) {
         }
 
         return "";

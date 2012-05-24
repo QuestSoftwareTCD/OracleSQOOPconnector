@@ -157,6 +157,7 @@
            <additionalClasspathElement>${project.build.directory}/${project.build.finalName}.jar</additionalClasspathElement>
            <additionalClasspathElement>${hadoop.conf.dir}</additionalClasspathElement>
          </additionalClasspathElements>
+         <forkMode>always</forkMode>
         </configuration>
         <executions>
           <execution>

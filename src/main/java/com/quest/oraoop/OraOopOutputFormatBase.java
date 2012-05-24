@@ -21,9 +21,13 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import oracle.jdbc.OraclePreparedStatement;
 import oracle.jdbc.driver.OracleConnection;
@@ -31,6 +35,7 @@ import oracle.jdbc.driver.OracleConnection;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.tools.ant.taskdefs.Java;
 
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AsyncSqlOutputFormat;
@@ -319,37 +324,42 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V>
                     sqlValues.append("\n,");
 
                 String pseudoColumnValue = generateInsertValueForPseudoColumn(columnName);
+                
+                String bindVarName = null;
 
-                if (pseudoColumnValue != null)
-                    sqlValues.append(pseudoColumnValue);
-                else {
+                if (pseudoColumnValue != null) {
+                    bindVarName = pseudoColumnValue;
+                } else if(oracleTableColumn.oracleType == oracle.jdbc.OracleTypes.STRUCT) {
+                  if (oracleTableColumn.dataType.equals(OraOopConstants.Oracle.URITYPE)) {
+                    bindVarName = String.format("urifactory.getUri(%s)"
+                                                  ,columnNameToBindVariable(columnName));
+                  }
+                } else if(getConf().getBoolean(OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING, OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING_DEFAULT)) {
                     switch (oracleTableColumn.oracleType) {
                         case oracle.jdbc.OracleTypes.DATE:
-                            sqlValues.append(String.format("to_date(%s, 'yyyy-mm-dd hh24:mi:ss')"
-                                                          ,columnNameToBindVariable(columnName)));
+                            bindVarName = String.format("to_date(%s, 'yyyy-mm-dd hh24:mi:ss')"
+                                                          ,columnNameToBindVariable(columnName));
                             break;
                         case oracle.jdbc.OracleTypes.TIMESTAMP:
-                            sqlValues.append(String.format("to_timestamp(%s, 'yyyy-mm-dd hh24:mi:ss.ff')"
-                                                          ,columnNameToBindVariable(columnName)));
+                            bindVarName = String.format("to_timestamp(%s, 'yyyy-mm-dd hh24:mi:ss.ff')"
+                                                          ,columnNameToBindVariable(columnName));
                             break;
                         case oracle.jdbc.OracleTypes.TIMESTAMPTZ:
-                            sqlValues.append(String.format("to_timestamp_tz(%s, 'yyyy-mm-dd hh24:mi:ss.ff TZR')"
-                                                          ,columnNameToBindVariable(columnName)));
+                            bindVarName = String.format("to_timestamp_tz(%s, 'yyyy-mm-dd hh24:mi:ss.ff TZR')"
+                                                          ,columnNameToBindVariable(columnName));
                             break;
                         case oracle.jdbc.OracleTypes.TIMESTAMPLTZ:
-                            sqlValues.append(String.format("to_timestamp_tz(%s, 'yyyy-mm-dd hh24:mi:ss.ff TZR')"
-                                                          ,columnNameToBindVariable(columnName)));
+                            bindVarName = String.format("to_timestamp_tz(%s, 'yyyy-mm-dd hh24:mi:ss.ff TZR')"
+                                                          ,columnNameToBindVariable(columnName));
                             break;
-                        case oracle.jdbc.OracleTypes.STRUCT: // <- E.g. URITYPE
-                            if (oracleTableColumn.dataType.equals(OraOopConstants.Oracle.URITYPE)) {
-                                sqlValues.append(String.format("urifactory.getUri(%s)"
-                                                              ,columnNameToBindVariable(columnName)));
-                                break; // <- Only break if we know how to handle this actual structure.
-                            }
-                        default:
-                            sqlValues.append(columnNameToBindVariable(columnName));
                     }
                 }
+                
+                if(bindVarName==null) {
+                  bindVarName = columnNameToBindVariable(columnName);
+                }
+                
+                sqlValues.append(bindVarName);
 
                 colCount++;
             }
@@ -399,12 +409,18 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V>
                     case oracle.jdbc.OracleTypes.TIMESTAMP: ;
                     case oracle.jdbc.OracleTypes.TIMESTAMPTZ: ;
                     case oracle.jdbc.OracleTypes.TIMESTAMPLTZ: {
-                        String value = (String) fieldMap.get(colName);
+                      Object objValue = fieldMap.get(colName);
+                      if(objValue instanceof Timestamp) {
+                        Timestamp value = (Timestamp) objValue;
+                        statement.setTimestampAtName(bindValueName, value);
+                      } else {
+                        String value = (String) objValue;
 
                         if (value == null || value.equalsIgnoreCase("null"))
                             value = "";
 
                         statement.setStringAtName(bindValueName, value);
+                      }
                         break;
                     }
 

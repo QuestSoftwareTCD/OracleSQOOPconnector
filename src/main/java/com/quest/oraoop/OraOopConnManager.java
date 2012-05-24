@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.OutputFormat;
+
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.manager.GenericJdbcManager;
@@ -66,10 +68,15 @@ public class OraOopConnManager extends GenericJdbcManager {
     public static final OraOopLog LOG = OraOopLogFactory.getLog(OraOopConnManager.class.getName());
     private List<String>          columnNamesInOracleTable = null;
     private Map<String, Integer>  columnTypesInOracleTable = null;
+    private final String          timestampJavaType;
 
     public OraOopConnManager(final SqoopOptions sqoopOptions) {
-
         super(OraOopConstants.ORACLE_JDBC_DRIVER_CLASS, sqoopOptions);
+        if(this.options.getConf().getBoolean(OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING, OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING_DEFAULT)) {
+          timestampJavaType = "String";
+        } else {
+          timestampJavaType = super.toJavaType(Types.TIMESTAMP);
+        }
     }
 
     @Override
@@ -362,7 +369,7 @@ public class OraOopConnManager extends GenericJdbcManager {
             // Melbourne.
             // (This is in response to daylight saving starting in Melbourne on
             // this date at 2am.)
-            javaType = "String";
+            javaType = timestampJavaType;
         }
 
         if (sqlType == oracle.jdbc.OracleTypes.TIMESTAMPTZ) {
@@ -374,14 +381,14 @@ public class OraOopConnManager extends GenericJdbcManager {
             // CSV file.
             // I.e. Get the Oracle JDBC driver to convert this value to a string
             // instead of the generic JDBC driver...
-            javaType = "String";
+            javaType = timestampJavaType;
         }
 
         if (sqlType == oracle.jdbc.OracleTypes.TIMESTAMPLTZ) {
             // Returning "String" produces:
             // "2010-08-08 09:00:00.0 Australia/Melbourne"
             // Returning "java.sql.Timestamp" produces: "2010-08-08 09:00:00.0"
-            javaType = "String";
+            javaType = timestampJavaType;
         }
 
         /*

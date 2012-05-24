@@ -119,7 +119,7 @@ public class OraOopCLI extends OraOopTestCase {
 	
 	public int importTable(String tableName, String targetDirectory) {
 		setSqoopTargetDirectory(targetDirectory);
-		return runImport(tableName);
+		return runImport(tableName, getSqoopConf(), false);
 	}
 	
 	public int exportTableFromTemplateTable(String templateTableName, String tableName, String targetDirectory) {

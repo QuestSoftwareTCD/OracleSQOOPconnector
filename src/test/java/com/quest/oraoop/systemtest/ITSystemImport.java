@@ -23,12 +23,12 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Map;
 
+import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OraclePreparedStatement;
 import oracle.sql.STRUCT;
 
@@ -78,7 +78,8 @@ public class ITSystemImport extends OraOopTestCase {
 		// Generate test data in oracle
 		setSqoopTargetDirectory(getSqoopTargetDirectory() + getTestEnvProperty("systemtest_table_name"));
 		final int numRows = Integer.valueOf(getTestEnvProperty("systemtest_num_rows"));
-		Connection conn = getTestEnvConnection();
+		OracleConnection conn = getTestEnvConnection();
+		conn.setSessionTimeZone("GMT");
 		try {
 			Statement s = conn.createStatement();
 			try {
@@ -156,7 +157,7 @@ public class ITSystemImport extends OraOopTestCase {
 				try {
 					// Import test data into hadoop
 					
-					int retCode = runImport(getTestEnvProperty("systemtest_table_name"),true);
+					int retCode = runImport(getTestEnvProperty("systemtest_table_name"),getSqoopConf(), true);
 					assertEquals("Return code should be 0", 0,retCode);
 
 					// Add sqoop generated code to the classpath

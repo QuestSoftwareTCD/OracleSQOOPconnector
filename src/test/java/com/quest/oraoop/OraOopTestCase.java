@@ -198,16 +198,8 @@ public abstract class OraOopTestCase {
 		}
 		return sqoopConf;
 	}
-	
-	protected int runImport(String tableName) {
-		return runImport(tableName, false);
-	}
-	
-	protected int runImport(String tableName, boolean sequenceFile) {
-		return runImport(tableName,sequenceFile, OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD_DEFAULT, null);
-	}
 
-	protected int runImport(String tableName, boolean sequenceFile, OraOopConstants.OraOopOracleDataChunkMethod dataChunkMethod, String partitionList) {
+	protected int runImport(String tableName, Configuration sqoopConf, boolean sequenceFile) {
 	  Logger rootLogger = Logger.getRootLogger();
 	  rootLogger.removeAllAppenders();
 	  StringWriter stringWriter = new StringWriter();
@@ -250,13 +242,6 @@ public abstract class OraOopTestCase {
 		if (getTestEnvProperty("num_mappers") != null) {
 			sqoopArgs.add("--num-mappers");
 			sqoopArgs.add(getTestEnvProperty("num_mappers"));
-		}
-
-		Configuration sqoopConf = getSqoopConf();
-		sqoopConf.set(OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD, dataChunkMethod.toString());
-		
-		if(partitionList!=null && !partitionList.isEmpty()) {
-		  sqoopConf.set(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST, partitionList);
 		}
 		
 		int rowsInTable = countTable(tableName, OraOopUtilities.splitOracleStringList(sqoopConf.get(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST)));

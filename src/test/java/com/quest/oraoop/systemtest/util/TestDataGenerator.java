@@ -43,7 +43,11 @@ public abstract class TestDataGenerator<T>
   public TestDataGenerator(long seed)
   {
     this.seed = seed;
-    rng = new Random(seed);
+    if(seed==0) {
+      rng = new Random();
+    } else {
+      rng = new Random(seed);
+    }
   }
 
   /**

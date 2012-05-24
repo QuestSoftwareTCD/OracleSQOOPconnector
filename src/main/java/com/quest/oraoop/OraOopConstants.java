@@ -203,6 +203,10 @@ public class OraOopConstants {
     // Additional columns to include with the --update-key column...
     public static final String ORAOOP_UPDATE_KEY_EXTRA_COLUMNS = "oraoop.update.key.extra.columns";
     
+    // Should OraOop map Timestamps as java.sql.Timestamp as Sqoop does, or as String
+    public static final String ORAOOP_MAP_TIMESTAMP_AS_STRING = "oraoop.timestamp.string";
+    public static final boolean ORAOOP_MAP_TIMESTAMP_AS_STRING_DEFAULT = true;
+    
     // This flag allows the user to force use of the APPEND_VALUES Oracle hint either ON, OFF or AUTO...
     public static final String ORAOOP_ORACLE_APPEND_VALUES_HINT_USAGE = "oraoop.oracle.append.values.hint.usage";
     

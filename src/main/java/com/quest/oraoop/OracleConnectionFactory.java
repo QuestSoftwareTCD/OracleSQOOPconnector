@@ -20,9 +20,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.TimeZone;
+
+import org.apache.hadoop.conf.Configuration;
 
 import oracle.jdbc.OracleConnection;
 
@@ -105,6 +109,8 @@ public class OracleConnectionFactory {
         throws SQLException {
 
         connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        
+        setConnectionTimeZone(connection, conf);
 
         setSessionClientInfo(connection, conf);
 
@@ -221,5 +227,18 @@ public class OracleConnectionFactory {
                                   ,ex);
         }
 
+    }
+    
+    private static void setConnectionTimeZone(Connection connection, Configuration conf) {
+      String timeZoneString = conf.get("oracle.sessionTimeZone", "GMT");
+      TimeZone timeZone = TimeZone.getTimeZone(timeZoneString);
+      try {
+        ((OracleConnection) connection).setSessionTimeZone(timeZone.getID());
+        ((OracleConnection) connection).setDefaultTimeZone(timeZone);
+        TimeZone.setDefault(timeZone);
+        LOG.info("Session Time Zone set to " + timeZone.getID());
+      } catch (SQLException e) {
+        LOG.error("Error setting time zone: " + e.getMessage());
+      }
     }
 }

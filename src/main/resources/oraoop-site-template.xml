@@ -22,8 +22,7 @@
 
   <property>
     <name>oraoop.oracle.session.initialization.statements</name>
-    <value>alter session set time_zone = '{oracle.sessionTimeZone|GMT}';
-           alter session disable parallel query;
+    <value>alter session disable parallel query;
            alter session set "_serial_direct_read"=true;
            alter session set tracefile_identifier=oraoop;
            --alter session set events '10046 trace name context forever, level 8';

@@ -18,6 +18,8 @@ package com.quest.oraoop.it;
 
 
 import junit.framework.Assert;
+
+import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 import com.quest.oraoop.OraOopConstants;
 import com.quest.oraoop.OraOopConstants.OraOopOracleDataChunkMethod;
@@ -31,7 +33,7 @@ public class ITImport extends OraOopTestCase {
 		createTable("table_tst_product.xml");
 		
 		try {
-			int retCode = runImport("tst_product");
+			int retCode = runImport("tst_product", getSqoopConf(), false);
 			Assert.assertEquals("Return code should be 0", 0,retCode);
 			
 		} finally {
@@ -46,7 +48,7 @@ public class ITImport extends OraOopTestCase {
 		createTable("table_tst_product_part.xml");
 		
 		try {
-			int retCode = runImport("tst_product_part");
+			int retCode = runImport("tst_product_part", getSqoopConf(), false);
 			Assert.assertEquals("Return code should be 0", 0,retCode);
 			
 		} finally {
@@ -60,8 +62,11 @@ public class ITImport extends OraOopTestCase {
 		setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product_part");
 		createTable("table_tst_product_part.xml");
 		
+    Configuration sqoopConf = getSqoopConf();
+    sqoopConf.set(OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD, OraOopConstants.OraOopOracleDataChunkMethod.PARTITION.toString());
+		
 		try {
-			int retCode = runImport("tst_product_part", false, OraOopConstants.OraOopOracleDataChunkMethod.PARTITION, null);
+		  int retCode = runImport("tst_product_part", sqoopConf, false);
 			Assert.assertEquals("Return code should be 0", 0,retCode);
 			
 		} finally {
@@ -75,8 +80,12 @@ public class ITImport extends OraOopTestCase {
     setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product_part");
     createTable("table_tst_product_part.xml");
     
+    Configuration sqoopConf = getSqoopConf();
+    sqoopConf.set(OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD, OraOopOracleDataChunkMethod.ROWID.toString());
+    sqoopConf.set(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST, "tst_product_part_1,tst_product_part_2,\"tst_product_pa#rt_6\"");
+    
     try {
-      int retCode = runImport("tst_product_part", false, OraOopOracleDataChunkMethod.ROWID, "tst_product_part_1,tst_product_part_2,\"tst_product_pa#rt_6\"");
+      int retCode = runImport("tst_product_part", sqoopConf, false);
       Assert.assertEquals("Return code should be 0", 0,retCode);
       
     } finally {
@@ -90,8 +99,12 @@ public class ITImport extends OraOopTestCase {
     setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product_part");
     createTable("table_tst_product_part.xml");
     
+    Configuration sqoopConf = getSqoopConf();
+    sqoopConf.set(OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD, OraOopOracleDataChunkMethod.PARTITION.toString());
+    sqoopConf.set(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST, "tst_product_part_1,tst_product_part_2,tst_product_part_3,\"tst_product_pa#rt_6\"");
+    
     try {
-      int retCode = runImport("tst_product_part", false, OraOopConstants.OraOopOracleDataChunkMethod.PARTITION, "tst_product_part_1,tst_product_part_2,tst_product_part_3,\"tst_product_pa#rt_6\"");
+      int retCode = runImport("tst_product_part", sqoopConf, false);
       Assert.assertEquals("Return code should be 0", 0,retCode);
       
     } finally {
@@ -106,7 +119,7 @@ public class ITImport extends OraOopTestCase {
 		createTable("table_tst_product_subpart.xml");
 		
 		try {
-			int retCode = runImport("tst_product_subpart");
+			int retCode = runImport("tst_product_subpart", getSqoopConf(), false);
 			Assert.assertEquals("Return code should be 0", 0,retCode);
 			
 		} finally {
@@ -120,8 +133,11 @@ public class ITImport extends OraOopTestCase {
 		setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product_subpart");
 		createTable("table_tst_product_subpart.xml");
 		
+    Configuration sqoopConf = getSqoopConf();
+    sqoopConf.set(OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD, OraOopConstants.OraOopOracleDataChunkMethod.PARTITION.toString());
+		
 		try {
-			int retCode = runImport("tst_product_subpart", false, OraOopConstants.OraOopOracleDataChunkMethod.PARTITION, null);
+			int retCode = runImport("tst_product_subpart", sqoopConf, false);
 			Assert.assertEquals("Return code should be 0", 0,retCode);
 			
 		} finally {
@@ -135,8 +151,12 @@ public class ITImport extends OraOopTestCase {
     setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product_subpart");
     createTable("table_tst_product_subpart.xml");
     
+    Configuration sqoopConf = getSqoopConf();
+    sqoopConf.set(OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD, OraOopOracleDataChunkMethod.ROWID.toString());
+    sqoopConf.set(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST, "TST_PRODUCT_PART_1,TST_PRODUCT_PART_2,TST_PRODUCT_PART_3,TST_PRODUCT_PART_4");
+    
     try {
-      int retCode = runImport("tst_product_subpart", false, OraOopOracleDataChunkMethod.ROWID, "TST_PRODUCT_PART_1,TST_PRODUCT_PART_2,TST_PRODUCT_PART_3,TST_PRODUCT_PART_4");
+      int retCode = runImport("tst_product_subpart", sqoopConf, false);
       Assert.assertEquals("Return code should be 0", 0,retCode);
       
     } finally {
@@ -149,9 +169,13 @@ public class ITImport extends OraOopTestCase {
   public void testProductSubPartImportSubsetPartitionChunk() throws Exception {
     setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product_subpart");
     createTable("table_tst_product_subpart.xml");
-    
+
+    Configuration sqoopConf = getSqoopConf();
+    sqoopConf.set(OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD, OraOopConstants.OraOopOracleDataChunkMethod.PARTITION.toString());
+    sqoopConf.set(OraOopConstants.ORAOOP_IMPORT_PARTITION_LIST, "TST_PRODUCT_PART_1,TST_PRODUCT_PART_2,TST_PRODUCT_PART_3");
+
     try {
-      int retCode = runImport("tst_product_subpart", false, OraOopConstants.OraOopOracleDataChunkMethod.PARTITION, "TST_PRODUCT_PART_1,TST_PRODUCT_PART_2,TST_PRODUCT_PART_3");
+      int retCode = runImport("tst_product_subpart", sqoopConf, false);
       Assert.assertEquals("Return code should be 0", 0,retCode);
       
     } finally {

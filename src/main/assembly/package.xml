@@ -16,7 +16,7 @@
 -->
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
-  <id>package</id>
+  <id>${classifier}</id>
   <formats>
     <format>tar.gz</format>
   </formats>
@@ -53,7 +53,7 @@
   </fileSets>
   <files>
     <file>
-      <source>${project.build.directory}/${project.build.finalName}.jar</source>
+      <source>${project.build.directory}/${project.build.finalName}-${classifier}.jar</source>
       <outputDirectory>bin</outputDirectory>
       <destName>oraoop.jar</destName>
     </file>

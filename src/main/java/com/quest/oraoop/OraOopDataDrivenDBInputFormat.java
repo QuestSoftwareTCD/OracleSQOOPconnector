@@ -29,13 +29,13 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 
+import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 
 //T is the output-type of the record reader.
-public class OraOopDataDrivenDBInputFormat<T extends DBWritable> extends DataDrivenDBInputFormat<T> 
+public class OraOopDataDrivenDBInputFormat<T extends SqoopRecord> extends DataDrivenDBInputFormat<T> 
     implements Configurable {
 
     public static final OraOopLog LOG = OraOopLogFactory.getLog(OraOopDataDrivenDBInputFormat.class.getName());

@@ -20,15 +20,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.cloudera.sqoop.lib.SqoopRecord;
 import com.quest.oraoop.OraOopConstants.OraOopOracleBlockToSplitAllocationMethod;
 
 public class OraOopDataDrivenDBInputFormatTest extends OraOopTestCase {
 
-	public class Exposer<T extends DBWritable> extends OraOopDataDrivenDBInputFormat<T> {
+	public class Exposer<T extends SqoopRecord> extends OraOopDataDrivenDBInputFormat<T> {
 		
 		// We're just exposing a protected method so that it can be called by this unit test...
 		@Override

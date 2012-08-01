@@ -188,6 +188,16 @@ public class OraOopManagerFactory extends ManagerFactory {
                         LOG.error("Unable to obtain the Oracle database version.", ex);
                     }
 
+                    try {
+                      if(sqoopOptions.getConf().getBoolean(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ, false)) {
+                        long scn = OraOopOracleQueries.getCurrentScn(oraOopConnManager.getConnection());
+                        sqoopOptions.getConf().setLong(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ_SCN, scn);
+                        LOG.info("Performing a consistent read using SCN: " + scn);
+                      }
+                    } catch(SQLException ex) {
+                      throw new RuntimeException("Unable to determine SCN of database.", ex);
+                    }
+
                     // Generate the JDBC URLs to be used by each mapper...
                     setMapperConnectionDetails(oraOopConnManager, jobData);
 

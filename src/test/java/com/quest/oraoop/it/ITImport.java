@@ -184,4 +184,22 @@ public class ITImport extends OraOopTestCase {
     }
   }
 
+  @Test
+  public void testProductImportConsistentRead() throws Exception {
+    setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product");
+    createTable("table_tst_product.xml");
+
+    Configuration sqoopConf = getSqoopConf();
+    sqoopConf.setBoolean(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ, true);
+    
+    try {
+      int retCode = runImport("tst_product", sqoopConf, false);
+      Assert.assertEquals("Return code should be 0", 0,retCode);
+      
+    } finally {
+      cleanupFolders();
+      closeTestEnvConnection();
+    }
+  }
+
 }

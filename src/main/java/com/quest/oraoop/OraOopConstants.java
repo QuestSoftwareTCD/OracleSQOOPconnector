@@ -119,6 +119,12 @@ public class OraOopConstants {
     // The name of the configuration property containing the string we want to pass to
     // dbms_application_info.set_module() via the "action_name" parameter...
     public static final String ORACLE_SESSION_ACTION_NAME = "oraoop.oracle.session.module.action";
+
+    // Boolean whether to do a consistent read based off an SCN
+    public static final String ORAOOP_IMPORT_CONSISTENT_READ = "oraoop.import.consistent.read";
+
+    // The SCN number to use for the consistent read - calculated automatically - cannot be overridden
+    public static final String ORAOOP_IMPORT_CONSISTENT_READ_SCN = "oraoop.import.consistent.read.scn";
     
     // The method that will be used to create data chunks - ROWID ranges or partitions
     public static final String ORAOOP_ORACLE_DATA_CHUNK_METHOD = "oraoop.chunk.method";

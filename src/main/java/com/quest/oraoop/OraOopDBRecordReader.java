@@ -141,6 +141,12 @@ class OraOopDBRecordReader<T extends SqoopRecord> extends DataDrivenDBRecordRead
 
     protected String getSelectQuery() {
 
+        boolean consistentRead = this.getDBConf().getConf().getBoolean(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ, false);
+        long consistentReadScn = this.getDBConf().getConf().getLong(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ_SCN, 0L);
+        if(consistentRead && consistentReadScn==0L) {
+            throw new RuntimeException("Could not get SCN for consistent read.");
+        }
+
         StringBuilder query = new StringBuilder();
 
         if (this.dbInputSplit.getDataChunks() == null) {
@@ -187,8 +193,15 @@ class OraOopDBRecordReader<T extends SqoopRecord> extends DataDrivenDBRecordRead
 
             query.append(" FROM ")
                  .append(this.getTableName())
-                 .append(" ")
-                 .append(getPartitionClauseForDataChunk(this.dbInputSplit, idx))
+                 .append(" ");
+
+            if(consistentRead) {
+              query.append("AS OF SCN ")
+                   .append(consistentReadScn)
+                   .append(" ");
+            }
+
+            query.append(getPartitionClauseForDataChunk(this.dbInputSplit, idx))
                  .append(" t")
                  .append("\n");
 

@@ -1372,5 +1372,17 @@ public class OraOopOracleQueries {
     		return table.getSchema();
     	}
     }
-    
+
+    public static long getCurrentScn(Connection connection) throws SQLException {
+      String sql = "SELECT current_scn FROM v$database";
+      PreparedStatement statement = connection.prepareStatement(sql);
+      ResultSet resultSet = statement.executeQuery();
+
+      resultSet.next();
+      long result = resultSet.getLong(1);
+      resultSet.close();
+      statement.close();
+
+      return result;
+    }
 }

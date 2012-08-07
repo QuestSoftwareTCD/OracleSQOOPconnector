@@ -102,11 +102,11 @@ public class OraOopManagerFactory extends ManagerFactory {
                                 }
                             }
                             catch (SQLException ex) {
-                                LOG.error(String.format("Unable to connect to the Oracle database at %s\n"+ 
-                                                        "Error:%s"
-                                                       ,sqoopOptions.getConnectString()
-                                                       ,ex.getMessage()));
-                                System.exit(1);
+                                throw new RuntimeException(String.format("Unable to connect to the Oracle database at %s\n"+ 
+                                                                         "Error:%s"
+                                                                         ,sqoopOptions.getConnectString()
+                                                                         ,ex.getMessage())
+                                                           , ex);
                             }
                         }
                         break;
@@ -126,11 +126,11 @@ public class OraOopManagerFactory extends ManagerFactory {
                                 connection = oraOopConnManager.getConnection();
                             }
                             catch (SQLException ex) {
-                                LOG.error(String.format("Unable to connect to the Oracle database at %s\n"+ 
-                                                        "Error:%s"
-                                                       ,sqoopOptions.getConnectString()
-                                                       ,ex.getMessage()));
-                                System.exit(1);
+                                throw new RuntimeException(String.format("Unable to connect to the Oracle database at %s\n"+ 
+                                                                         "Error:%s"
+                                                                         ,sqoopOptions.getConnectString()
+                                                                         ,ex.getMessage())
+                                                           , ex);
                             }
 
                             try {
@@ -731,11 +731,10 @@ public class OraOopManagerFactory extends ManagerFactory {
             // Check that the "oraoop.export.merge" property has not been specified, as this would be
             // an invalid scenario...
             if(OraOopUtilities.getExportUpdateMode(conf) == UpdateMode.Merge) {
-                LOG.error(String.format("\n\nThe option \"%s\" can only be used if \"%s\" is "+
-                                        "also used.\n"
-                                       ,OraOopConstants.ORAOOP_EXPORT_MERGE
-                                       ,"--update-key"));
-                System.exit(1);
+                throw new RuntimeException(String.format("\n\nThe option \"%s\" can only be used if \"%s\" is "+
+                                                         "also used.\n"
+                                                         ,OraOopConstants.ORAOOP_EXPORT_MERGE
+                                                         ,"--update-key"));
             }
         }        
 
@@ -750,8 +749,7 @@ public class OraOopManagerFactory extends ManagerFactory {
                                            "Oracle will not allow a table with this name to be created."
                                           ,oraOopConnManager.getOracleTableContext().getName()
                                           ,OraOopConstants.Oracle.MAX_IDENTIFIER_LENGTH);
-                LOG.error(msg);
-                System.exit(1); 
+                throw new RuntimeException(msg);
             }
                 
             
@@ -766,12 +764,11 @@ public class OraOopManagerFactory extends ManagerFactory {
                 // table with no rows in it...
                 UpdateMode updateMode = OraOopUtilities.getExportUpdateMode(conf);
                 if(updateMode == UpdateMode.Update) {
-                    LOG.error(String.format("\n\nCombining the option \"%s\" with the option \"%s=false\" is "+
-                                            "nonsensical, as this would create an empty table and then perform "+
-                                            "a lot of work that results in a table containing no rows.\n"
-                                           ,OraOopConstants.ORAOOP_EXPORT_CREATE_TABLE_TEMPLATE
-                                           ,OraOopConstants.ORAOOP_EXPORT_MERGE));
-                    System.exit(1);
+                    throw new RuntimeException(String.format("\n\nCombining the option \"%s\" with the option \"%s=false\" is "+
+                                                             "nonsensical, as this would create an empty table and then perform "+
+                                                             "a lot of work that results in a table containing no rows.\n"
+                                                             ,OraOopConstants.ORAOOP_EXPORT_CREATE_TABLE_TEMPLATE
+                                                             ,OraOopConstants.ORAOOP_EXPORT_MERGE));
                 }
             }
             else {

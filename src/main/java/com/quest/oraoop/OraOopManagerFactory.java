@@ -190,7 +190,10 @@ public class OraOopManagerFactory extends ManagerFactory {
 
                     try {
                       if(sqoopOptions.getConf().getBoolean(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ, false)) {
-                        long scn = OraOopOracleQueries.getCurrentScn(oraOopConnManager.getConnection());
+                        long scn = sqoopOptions.getConf().getLong(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ_SCN, 0);
+                        if(scn==0) {
+                          scn = OraOopOracleQueries.getCurrentScn(oraOopConnManager.getConnection());
+                        }
                         sqoopOptions.getConf().setLong(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ_SCN, scn);
                         LOG.info("Performing a consistent read using SCN: " + scn);
                       }

@@ -25,6 +25,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <hadoop.conf.dir>${env.HADOOP_CONF_DIR}</hadoop.conf.dir>
     <oracle.jdbc.url>jdbc:oracle:thin:@//localhost:1521/orcl</oracle.jdbc.url>
+    <build.number>${env.BUILD_NUMBER}</build.number>
   </properties>
 
   <scm>
@@ -106,7 +107,7 @@
           <classifier>${classifier}</classifier>
           <archive>
             <manifestEntries>
-              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Version>${project.version}-${classifier}-${build.number}</Implementation-Version>
             </manifestEntries>
           </archive>
           <excludes>

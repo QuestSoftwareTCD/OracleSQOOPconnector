@@ -162,7 +162,7 @@ public class ITSystemImport extends OraOopTestCase {
 
 					// Add sqoop generated code to the classpath
 					String sqoopGenJarPath = "file://" + getSqoopGenLibDirectory() + "/"
-							+ getTestEnvProperty("systemtest_table_name") + ".jar";
+							+ getSqoopGenClassName() + ".jar";
 					URLClassLoader loader = new URLClassLoader(new URL[] { new URL(sqoopGenJarPath) }, getClass()
 							.getClassLoader());
 					Thread.currentThread().setContextClassLoader(loader);

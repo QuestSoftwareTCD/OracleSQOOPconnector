@@ -202,4 +202,19 @@ public class ITImport extends OraOopTestCase {
     }
   }
 
+  @Test
+  public void testProductImportMixedCaseTableName() throws Exception {
+    setSqoopTargetDirectory(getSqoopTargetDirectory() + "T5+_Pr#duct");
+    createTable("table_tst_product_special_chars.xml");
+    
+    try {
+      int retCode = runImport("\"\"T5+_Pr#duct\"\"", getSqoopConf(), false);
+      Assert.assertEquals("Return code should be 0", 0,retCode);
+      
+    } finally {
+      cleanupFolders();
+      closeTestEnvConnection();
+    }
+  }
+
 }

@@ -95,12 +95,12 @@ public abstract class OracleData {
 				keyColumnList.append(delim).append(column);
 				delim = ",";
 			}
-			String keySql = "alter table $TABLE_NAME add constraint $TABLE_NAME_" +
-							((keyType==KeyType.PRIMARY) ? "pk primary key" : "uk unique") +
+			String keySql = "alter table \"$TABLE_NAME\" add constraint \"$TABLE_NAME_" +
+							((keyType==KeyType.PRIMARY) ? "PK\" primary key" : "UK\" unique") +
 							"($PK_COLUMN_LIST) " + 
-							"using index (create unique index $TABLE_NAME_" + 
-							((keyType==KeyType.PRIMARY) ? "pk" : "uk") +
-							" on $TABLE_NAME($PK_COLUMN_LIST) " +
+							"using index (create unique index \"$TABLE_NAME_" + 
+							((keyType==KeyType.PRIMARY) ? "PK\"" : "UK\"") +
+							" on \"$TABLE_NAME\"($PK_COLUMN_LIST) " +
 							"parallel nologging)";
 			keySql = keySql.replaceAll("\\$TABLE_NAME", tableDefinition.getTableName());
 			keySql = keySql.replaceAll("\\$PK_COLUMN_LIST", keyColumnList.toString());
@@ -135,7 +135,7 @@ public abstract class OracleData {
 		createPackageSpec(conn, tableDefinition);
 		createPackageBody(conn, tableDefinition);
 
-		CallableStatement procStmt = conn.prepareCall("begin pkg_odg_" + tableDefinition.getTableName() + ".prc_load_table(?,?); end;");
+		CallableStatement procStmt = conn.prepareCall("begin \"PKG_ODG_" + tableDefinition.getTableName() + "\".prc_load_table(?,?); end;");
 		procStmt.setInt(1, parallelDegree);
 		procStmt.setInt(2, rowsPerSlave);
 		procStmt.execute();

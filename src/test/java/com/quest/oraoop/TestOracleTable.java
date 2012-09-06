@@ -25,13 +25,13 @@ public class TestOracleTable extends OraOopTestCase {
 	@Test
 	public void testToString() {
 		OracleTable table = new OracleTable("ORAOOP","TEST_TABLE");
-		Assert.assertEquals("ORAOOP.TEST_TABLE", table.toString());
+		Assert.assertEquals("\"ORAOOP\".\"TEST_TABLE\"", table.toString());
 		
 		table = new OracleTable("","TEST_TABLE2");
-		Assert.assertEquals("TEST_TABLE2",table.toString());
+		Assert.assertEquals("\"TEST_TABLE2\"",table.toString());
 		
 		table = new OracleTable("TEST_TABLE3");
-		Assert.assertEquals("TEST_TABLE3",table.toString());
+		Assert.assertEquals("\"TEST_TABLE3\"",table.toString());
 	}
 
 }

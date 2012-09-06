@@ -52,6 +52,7 @@ public abstract class OraOopTestCase {
 	private String sqoopGenLibDirectory = System.getProperty("user.dir") + "/target/tmp/lib";
 	private String sqoopGenSrcDirectory = System.getProperty("user.dir") + "/target/tmp/src";
 	private String sqoopTargetDirectory = "target/tmp/";
+	private String sqoopGenClassName = "com.quest.oraoop.gen.OraOopTestClass";
 	
 	private OracleConnection conn;
 	
@@ -108,7 +109,11 @@ public abstract class OraOopTestCase {
 
 	protected String getSqoopGenSrcDirectory() {
 	   return sqoopGenSrcDirectory;
-	}       
+	}
+	
+	protected String getSqoopGenClassName() {
+	  return sqoopGenClassName;
+	}
 
 	protected String getTestEnvProperty(String name) {
 		return this.conf.getProperty(name);
@@ -158,7 +163,12 @@ public abstract class OraOopTestCase {
 		}
 	}
 	
-	protected int countTable(String tableName, List<String> partitionList) {
+	protected int countTable(String inputTableName, List<String> partitionList) {
+	  String tableName = inputTableName;
+	  if(tableName.startsWith("\"\"") && tableName.endsWith("\"\"")) {
+	    //Table names may be double quoted to work around Sqoop issue
+	    tableName = tableName.substring(1, tableName.length() - 1);
+	  }
 	  String sql = null;
 	  int numRows = 0;
 	  if(partitionList!=null&&partitionList.size()>0) {
@@ -230,8 +240,8 @@ public abstract class OraOopTestCase {
 		sqoopArgs.add("--target-dir");
 		sqoopArgs.add(this.sqoopTargetDirectory);
 
-		sqoopArgs.add("--package-name");
-		sqoopArgs.add("com.quest.oraoop.gen");
+    sqoopArgs.add("--class-name");
+    sqoopArgs.add(getSqoopGenClassName());
 
 		sqoopArgs.add("--bindir");
 		sqoopArgs.add(this.sqoopGenLibDirectory);
@@ -283,8 +293,8 @@ public abstract class OraOopTestCase {
 		sqoopArgs.add("--export-dir");
 		sqoopArgs.add(this.sqoopTargetDirectory);
 
-		sqoopArgs.add("--package-name");
-		sqoopArgs.add("com.quest.oraoop.gen");
+		sqoopArgs.add("--class-name");
+    sqoopArgs.add(getSqoopGenClassName());
 
 		sqoopArgs.add("--bindir");
 		sqoopArgs.add(this.sqoopGenLibDirectory);

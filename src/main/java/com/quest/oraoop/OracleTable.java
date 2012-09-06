@@ -53,8 +53,8 @@ public class OracleTable {
 
     @Override
     public String toString() {
-    	String result = (getSchema() == null || getSchema().isEmpty()) ? "" : getSchema() + ".";
-    	result += getName();
+    	String result = (getSchema() == null || getSchema().isEmpty()) ? "" : "\"" + getSchema() + "\".";
+    	result += "\"" + getName() + "\"";
     	return result;
     }
 

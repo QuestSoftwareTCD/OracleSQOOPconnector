@@ -26,6 +26,7 @@
     <hadoop.conf.dir>${env.HADOOP_CONF_DIR}</hadoop.conf.dir>
     <oracle.jdbc.url>jdbc:oracle:thin:@//localhost:1521/orcl</oracle.jdbc.url>
     <build.number>${env.BUILD_NUMBER}</build.number>
+    <java.security.egd>file:///dev/urandom</java.security.egd>
   </properties>
 
   <scm>
@@ -171,7 +172,7 @@
         <configuration>
           <tagNameFormat>@{project.version}</tagNameFormat>
           <useReleaseProfile>false</useReleaseProfile>
-          <arguments>-Doracle.jdbc.url="${oracle.jdbc.url}" -Dhadoop.conf.dir="${hadoop.conf.dir}"</arguments>
+          <arguments>-Doracle.jdbc.url="${oracle.jdbc.url}" -Dhadoop.conf.dir="${hadoop.conf.dir}" -Djava.security.egd=${java.security.egd}</arguments>
         </configuration>
       </plugin>
     </plugins>

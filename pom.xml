@@ -154,6 +154,7 @@
            <additionalClasspathElement>${hadoop.conf.dir}</additionalClasspathElement>
          </additionalClasspathElements>
          <forkMode>always</forkMode>
+         <argLine>-Djava.security.egd=${java.security.egd}</argLine>
         </configuration>
         <executions>
           <execution>

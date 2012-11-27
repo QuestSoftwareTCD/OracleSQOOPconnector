@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 
@@ -340,6 +341,7 @@ public class OraOopManagerFactory extends ManagerFactory {
         if (testDynamicallyGeneratedOracleRacInstanceConnection(jdbcUrl
                                                                ,jobData.getSqoopOptions().getUsername()
                                                                ,jobData.getSqoopOptions().getPassword()
+                                                               ,jobData.getSqoopOptions().getConnectionParams()
                                                                ,false       //<- ShowInstanceSysTimestamp
                                                                , ""         //<- instanceDescription
                                                                )) {
@@ -374,6 +376,7 @@ public class OraOopManagerFactory extends ManagerFactory {
             if (testDynamicallyGeneratedOracleRacInstanceConnection(jdbcActiveInstanceThinConnection.toString()
                                                                    ,jobData.getSqoopOptions().getUsername()
                                                                    ,jobData.getSqoopOptions().getPassword()
+                                                                   ,jobData.getSqoopOptions().getConnectionParams()
                                                                    ,true
                                                                    ,activeInstance.instanceName)) {
                 jdbcOracleActiveThinConnections.add(jdbcActiveInstanceThinConnection);
@@ -415,6 +418,7 @@ public class OraOopManagerFactory extends ManagerFactory {
     private boolean testDynamicallyGeneratedOracleRacInstanceConnection(String url
                                                                        ,String userName
                                                                        ,String password
+                                                                       ,Properties additionalProps
                                                                        ,boolean showInstanceSysTimestamp
                                                                        ,String instanceDescription) {
 
@@ -422,7 +426,7 @@ public class OraOopManagerFactory extends ManagerFactory {
 
         // Test the connection...
         try {
-            Connection testConnection = OracleConnectionFactory.createOracleJdbcConnection(OraOopConstants.ORACLE_JDBC_DRIVER_CLASS, url, userName, password);
+            Connection testConnection = OracleConnectionFactory.createOracleJdbcConnection(OraOopConstants.ORACLE_JDBC_DRIVER_CLASS, url, userName, password, additionalProps);
 
             // Show the system time on each instance...
             if (showInstanceSysTimestamp)

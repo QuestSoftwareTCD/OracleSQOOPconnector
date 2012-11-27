@@ -24,6 +24,7 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -85,11 +86,13 @@ public class OraOopConnManager extends GenericJdbcManager {
         String connectStr = this.options.getConnectString(); 
         String username = this.options.getUsername();
         String password = this.options.getPassword();
+        Properties additionalProps = this.options.getConnectionParams();
 
         Connection connection = OracleConnectionFactory.createOracleJdbcConnection(this.getDriverClass()
                                                                               ,connectStr
                                                                               ,username
                                                                               ,password
+                                                                              ,additionalProps
                                                                               );
         
         return connection;

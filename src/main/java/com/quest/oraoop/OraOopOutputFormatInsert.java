@@ -34,7 +34,7 @@ public class OraOopOutputFormatInsert<K extends SqoopRecord, V>
 
     private static final OraOopLog LOG = OraOopLogFactory.getLog(OraOopOutputFormatInsert.class);
 
-    public enum InsertMode {DirectInsert, ExchangePartition};
+    public enum InsertMode {DirectInsert, ExchangePartition}
     
     @Override
     public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context) throws IOException {
@@ -168,8 +168,8 @@ public class OraOopOutputFormatInsert<K extends SqoopRecord, V>
         private void exchangePartitionUniqueMapperTableDataIntoMainExportTable(TaskAttemptContext context) throws SQLException {
 
             String schema = context.getConfiguration().get(OraOopConstants.ORAOOP_TABLE_OWNER);
-            String tableName = context.getConfiguration().get(OraOopConstants.ORAOOP_TABLE_NAME);
-            OracleTable mainTable = new OracleTable(schema, tableName);
+            String localTableName = context.getConfiguration().get(OraOopConstants.ORAOOP_TABLE_NAME);
+            OracleTable mainTable = new OracleTable(schema, localTableName);
 
             try {
                 long start = System.nanoTime();

@@ -354,8 +354,8 @@ public class OraOopOracleQueries {
         return getTables(connection, null, null, TableNameQueryType.Equals);
     }
     
-    private enum GetTablesOptions {Owner, Table};
-    private enum TableNameQueryType {Equals, Like};
+    private enum GetTablesOptions {Owner, Table}
+    private enum TableNameQueryType {Equals, Like}
     
     public static List<OracleTable> getTables(Connection connection
                                              ,String owner) throws SQLException {
@@ -606,6 +606,9 @@ public class OraOopOracleQueries {
                     columnNamesToOmit.add(OraOopConstants.COLUMN_NAME_EXPORT_PARTITION);
                     columnNamesToOmit.add(OraOopConstants.COLUMN_NAME_EXPORT_SUBPARTITION);
                     columnNamesToOmit.add(OraOopConstants.COLUMN_NAME_EXPORT_MAPPER_ROW);
+                    break;
+                default:
+                    // Only applicable for export.
                     break;
             }
         }
@@ -1089,7 +1092,7 @@ public class OraOopOracleQueries {
         statement.close();        
     }
     
-    public enum CreateExportChangesTableOptions {OnlyRowsThatDiffer, RowsThatDifferPlusNewRows};
+    public enum CreateExportChangesTableOptions {OnlyRowsThatDiffer, RowsThatDifferPlusNewRows}
     
     public static int createExportChangesTable(Connection connection
                                               ,OracleTable tableToCreate

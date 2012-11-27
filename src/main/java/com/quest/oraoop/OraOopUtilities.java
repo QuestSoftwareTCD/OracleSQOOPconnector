@@ -910,7 +910,7 @@ public class OraOopUtilities {
 
         OraOopConstants.Sqoop.Tool tool = OraOopUtilities.recallSqoopJobType(conf);
         switch (tool) {
-            case UNKNOWN: ;
+            case UNKNOWN:
             case EXPORT:
                 return true;
 

@@ -260,6 +260,7 @@ public class OraOopDataDrivenDBInputFormat<T extends SqoopRecord> extends DataDr
                 // NB: No "break;" statement here - we're intentionally falling into the ROUNDROBIN block below...
             }
 
+            //$FALL-THROUGH$
             case ROUNDROBIN: {
                 int idxSplit = 0;
                 for (OraOopOracleDataChunk dataChunk : dataChunks) {

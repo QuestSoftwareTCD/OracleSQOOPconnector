@@ -35,9 +35,9 @@ public class OraOopOutputFormatUpdate<K extends SqoopRecord, V>
 
     private static final OraOopLog LOG = OraOopLogFactory.getLog(OraOopOutputFormatUpdate.class);
     
-    public enum UpdateMode {Update, Merge};
+    public enum UpdateMode {Update, Merge}
     
-    private enum ExportTableUpdateTechnique {ReInsertUpdatedRows, ReInsertUpdatedRowsAndNewRows, UpdateSql, MergeSql};
+    private enum ExportTableUpdateTechnique {ReInsertUpdatedRows, ReInsertUpdatedRowsAndNewRows, UpdateSql, MergeSql}
     
     @Override
     public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context) throws IOException {
@@ -201,8 +201,8 @@ public class OraOopOutputFormatUpdate<K extends SqoopRecord, V>
         private void updateMainExportTableFromUniqueMapperTable(TaskAttemptContext context, String[] mergeColumnNames) throws SQLException {
         
             String schema = context.getConfiguration().get(OraOopConstants.ORAOOP_TABLE_OWNER);
-            String tableName = context.getConfiguration().get(OraOopConstants.ORAOOP_TABLE_NAME);
-            OracleTable targetTable = new OracleTable(schema, tableName);  
+            String localTableName = context.getConfiguration().get(OraOopConstants.ORAOOP_TABLE_NAME);
+            OracleTable targetTable = new OracleTable(schema, localTableName);  
             
             oracle.sql.DATE sysDateTime = getJobSysDate(context);
             OracleTable changesTable = OraOopUtilities.generateExportTableMapperTableName(Integer.toString(this.mapperId) + "_CHG"

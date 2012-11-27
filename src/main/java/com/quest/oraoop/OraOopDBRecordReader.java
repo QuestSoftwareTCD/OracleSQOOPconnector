@@ -139,6 +139,7 @@ class OraOopDBRecordReader<T extends SqoopRecord> extends DataDrivenDBRecordRead
         return result.toArray(new String[result.size()]);
     }
 
+    @Override
     protected String getSelectQuery() {
 
         boolean consistentRead = this.getDBConf().getConf().getBoolean(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ, false);
@@ -291,6 +292,7 @@ class OraOopDBRecordReader<T extends SqoopRecord> extends DataDrivenDBRecordRead
     }
 
     /** {@inheritDoc} */
+    @Override
     public long getPos() throws IOException {
 
         // This split contains multiple data-chunks.
@@ -300,6 +302,7 @@ class OraOopDBRecordReader<T extends SqoopRecord> extends DataDrivenDBRecordRead
     }
 
     /** {@inheritDoc} */
+    @Override
     public float getProgress() throws IOException {
 
         return numberOfBlocksProcessedInThisSplit / (float) numberOfBlocksInThisSplit;

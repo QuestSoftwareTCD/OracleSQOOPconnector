@@ -64,7 +64,7 @@ public class OraOopConstants {
 
     public enum OraOopTableImportWhereClauseLocation {
         SUBSPLIT, SPLIT
-    };
+    }
 
     // The SQL statements to execute for each new Oracle session that is created...
     public static final String ORAOOP_SESSION_INITIALIZATION_STATEMENTS = "oraoop.oracle.session.initialization.statements";
@@ -142,7 +142,7 @@ public class OraOopConstants {
 
     public enum OraOopOracleBlockToSplitAllocationMethod {
         ROUNDROBIN, SEQUENTIAL, RANDOM
-    };
+    }
 
     // Whether to omit LOB and LONG columns during an import...
     public static final String ORAOOP_IMPORT_OMIT_LOBS_AND_LONG = "oraoop.import.omit.lobs.and.long";
@@ -218,7 +218,7 @@ public class OraOopConstants {
     
     public enum AppendValuesHintUsage {
         AUTO, ON, OFF
-    }; 
+    } 
     
     // http://download.oracle.com/docs/cd/E11882_01/server.112/e17118/sql_elements001.htm#i45441
     public static final String SUPPORTED_IMPORT_ORACLE_DATA_TYPES_CLAUSE = "(DATA_TYPE IN ("+
@@ -331,7 +331,7 @@ public class OraOopConstants {
 
         public enum Tool {
             UNKNOWN, IMPORT, EXPORT
-        };
+        }
 
         public static final String IMPORT_TOOL_NAME = "import";
         public static final String MAX_MAPREDUCE_ATTEMPTS = "mapred.map.max.attempts";
@@ -356,7 +356,7 @@ public class OraOopConstants {
     public static class Logging {
         public enum Level {
             TRACE, DEBUG, INFO, WARN, ERROR, FATAL
-        };
+        }
     }
 
 }

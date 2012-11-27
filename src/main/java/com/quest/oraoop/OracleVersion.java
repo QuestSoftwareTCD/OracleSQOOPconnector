@@ -32,18 +32,18 @@ public class OracleVersion {
         this.banner = banner;
     }
 
-    public boolean isGreaterThanOrEqualTo(int major, int minor, int version, int patch) {
+    public boolean isGreaterThanOrEqualTo(int otherMajor, int otherMinor, int otherVersion, int otherPatch) {
 
-        if (this.major > major)
+        if (this.major > otherMajor)
             return true;
 
-        if (this.major == major && this.minor > minor)
+        if (this.major == otherMajor && this.minor > otherMinor)
             return true;
 
-        if (this.major == major && this.minor == minor && this.version > version)
+        if (this.major == otherMajor && this.minor == otherMinor && this.version > otherVersion)
             return true;
 
-        if (this.major == major && this.minor == minor && this.version == version && this.patch >= patch)
+        if (this.major == otherMajor && this.minor == otherMinor && this.version == otherVersion && this.patch >= otherPatch)
             return true;
 
         return false;

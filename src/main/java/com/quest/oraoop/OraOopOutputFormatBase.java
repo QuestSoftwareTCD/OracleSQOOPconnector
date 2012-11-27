@@ -22,12 +22,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import oracle.jdbc.OraclePreparedStatement;
 import oracle.jdbc.driver.OracleConnection;
@@ -35,7 +32,6 @@ import oracle.jdbc.driver.OracleConnection;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.tools.ant.taskdefs.Java;
 
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AsyncSqlOutputFormat;
@@ -225,15 +221,15 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V>
             Configuration conf = context.getConfiguration();
             
             String schema = context.getConfiguration().get(OraOopConstants.ORAOOP_TABLE_OWNER); 
-            String tableName = context.getConfiguration().get(OraOopConstants.ORAOOP_TABLE_NAME);
+            String localTableName = context.getConfiguration().get(OraOopConstants.ORAOOP_TABLE_NAME);
     
             if (schema == null || 
                 schema.isEmpty() || 
-                tableName == null || 
-                tableName.isEmpty())
+                localTableName == null || 
+                    localTableName.isEmpty())
                 throw new RuntimeException("Unable to recall the schema and name of the Oracle table being exported.");
     
-            this.oracleTable = new OracleTable(schema, tableName);
+            this.oracleTable = new OracleTable(schema, localTableName);
     
             setOracleTableColumns(OraOopOracleQueries.getTableColumns(this.getConnection()
                                                                      ,this.oracleTable
@@ -394,7 +390,7 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V>
                 bindValueName = columnNameToBindVariable(colName).replaceFirst(":", "");
 
                 OracleTableColumn oracleTableColumn = oracleTableColumns.findColumnByName(colName);
-                int oracleType = (int) oracleTableColumn.oracleType;
+                int oracleType = oracleTableColumn.oracleType;
 
                 switch (oracleType) {
 
@@ -406,8 +402,8 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V>
                         statement.setStringAtName(bindValueName, (String) fieldMap.get(colName));
                         break;
 
-                    case oracle.jdbc.OracleTypes.TIMESTAMP: ;
-                    case oracle.jdbc.OracleTypes.TIMESTAMPTZ: ;
+                    case oracle.jdbc.OracleTypes.TIMESTAMP:
+                    case oracle.jdbc.OracleTypes.TIMESTAMPTZ:
                     case oracle.jdbc.OracleTypes.TIMESTAMPLTZ: {
                       Object objValue = fieldMap.get(colName);
                       if(objValue instanceof Timestamp) {
@@ -584,9 +580,9 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V>
             oracle.sql.DATE sysDateTime = getJobSysDate(context);
             
             String schema = conf.get(OraOopConstants.ORAOOP_TABLE_OWNER); 
-            String tableName = conf.get(OraOopConstants.ORAOOP_TABLE_NAME);  
+            String localTableName = conf.get(OraOopConstants.ORAOOP_TABLE_NAME);  
             
-            OracleTable templateTable = new OracleTable(schema, tableName);
+            OracleTable templateTable = new OracleTable(schema, localTableName);
             
             OracleTable mapperTable = OraOopUtilities.generateExportTableMapperTableName(this.mapperId
                                                                                         ,sysDateTime

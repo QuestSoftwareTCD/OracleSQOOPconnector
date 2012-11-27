@@ -166,7 +166,7 @@ public class ITOracleConnectionFactory extends OraOopTestCase {
 		//Exposer.LOG = null;
 		//protected static final Log LOG = LogFactory.getLog(OracleConnectionFactory.class.getName());
 		
-		OraOopLogFactory.OraOopLog2 oraoopLog = (OraOopLogFactory.OraOopLog2)Exposer.LOG;
+		OraOopLogFactory.OraOopLog2 oraoopLog = Exposer.LOG;
 		
 		oraoopLog.setCacheLogEntries(true);
 		
@@ -307,9 +307,7 @@ public class ITOracleConnectionFactory extends OraOopTestCase {
 				Assert.fail("Unable to drop the table " + tableName);
 		}
 		catch(SQLException ex) {
-			if(ex.getErrorCode() == 942) //<- Table or view does not exist 
-				; // This is okay - we tried to drop a table that did not exist.
-			else
+			if(ex.getErrorCode() != 942) //<- Table or view does not exist
 				Assert.fail(ex.getMessage());
 		}
 	}

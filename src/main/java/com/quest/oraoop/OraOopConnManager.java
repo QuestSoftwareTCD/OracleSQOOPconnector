@@ -66,6 +66,7 @@ import com.cloudera.sqoop.util.ImportException;
 
 public class OraOopConnManager extends GenericJdbcManager {
 
+    @SuppressWarnings("hiding")
     public static final OraOopLog LOG = OraOopLogFactory.getLog(OraOopConnManager.class.getName());
     private List<String>          columnNamesInOracleTable = null;
     private Map<String, Integer>  columnTypesInOracleTable = null;
@@ -196,6 +197,7 @@ public class OraOopConnManager extends GenericJdbcManager {
         return colNamesInTable;
     }
 
+    @Override
     protected String getColTypesQuery(String tableName) {
 
         List<String> colNames = getSelectedColumnNamesInOracleTable(tableName);

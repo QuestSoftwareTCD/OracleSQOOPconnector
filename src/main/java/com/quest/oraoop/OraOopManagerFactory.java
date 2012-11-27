@@ -155,6 +155,9 @@ public class OraOopManagerFactory extends ManagerFactory {
                         }
 
                         break;
+                    default:
+                        // OraOop doesn't know how to handle other types of jobs - so won't accept them.
+                        break;
                 }
 
                 // If OraOop has accepted this Sqoop job...
@@ -179,7 +182,7 @@ public class OraOopManagerFactory extends ManagerFactory {
 
                     // Get the Oracle database version...
                     try {
-                        OracleVersion oracleVersion = OraOopOracleQueries.getOracleVersion(oraOopConnManager.getConnection());
+                        OracleVersion oracleVersion = OraOopOracleQueries.getOracleVersion(result.getConnection());
                         LOG.info(String.format("Oracle Database version: %s"
                                               ,oracleVersion.banner));
                         sqoopOptions.getConf().setInt(OraOopConstants.ORAOOP_ORACLE_DATABASE_VERSION_MAJOR, oracleVersion.major);
@@ -193,7 +196,7 @@ public class OraOopManagerFactory extends ManagerFactory {
                       if(sqoopOptions.getConf().getBoolean(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ, false)) {
                         long scn = sqoopOptions.getConf().getLong(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ_SCN, 0);
                         if(scn==0) {
-                          scn = OraOopOracleQueries.getCurrentScn(oraOopConnManager.getConnection());
+                          scn = OraOopOracleQueries.getCurrentScn(result.getConnection());
                         }
                         sqoopOptions.getConf().setLong(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ_SCN, scn);
                         LOG.info("Performing a consistent read using SCN: " + scn);

@@ -63,6 +63,7 @@ class OraOopDBInputSplit extends DBInputFormat.DBInputSplit {
             return this.getDataChunks().size();
     }
 
+    @Override
     public String[] getLocations() throws IOException {
 
         if (this.splitLocation.isEmpty())
@@ -75,6 +76,7 @@ class OraOopDBInputSplit extends DBInputFormat.DBInputSplit {
     /**
      * @return The total number of blocks within the data-chunks of this split
      */
+    @Override
     public long getLength() {
 
         return this.getTotalNumberOfBlocksInThisSplit();

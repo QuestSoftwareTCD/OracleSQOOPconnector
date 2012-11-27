@@ -249,6 +249,7 @@ public class ITSystemImport extends OraOopTestCase {
 								assertFalse("Found multiple rows with id " + id + " in oracle", rs.next());
 								hadoopRecordCount++;
 							}
+						reader.close();
 						}
 					}
 					ResultSet rs = s.executeQuery("SELECT COUNT(*) FROM " + getTestEnvProperty("systemtest_table_name"));

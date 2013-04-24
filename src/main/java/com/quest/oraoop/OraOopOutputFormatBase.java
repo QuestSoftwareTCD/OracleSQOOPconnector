@@ -30,6 +30,7 @@ import oracle.jdbc.OraclePreparedStatement;
 import oracle.jdbc.driver.OracleConnection;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
@@ -168,7 +169,8 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V>
         }
     }
     
-    abstract class OraOopDBRecordWriterBase extends ExportOutputFormat<K, V>.ExportRecordWriter {
+    abstract class OraOopDBRecordWriterBase<K extends com.cloudera.sqoop.lib
+        .SqoopRecord, V> extends ExportOutputFormat<K, V>.ExportRecordWriter<K,V> {
 
         protected OracleTable oracleTable;                        //<- If exporting into a partitioned table, this table will be unique for this mapper
         private OracleTableColumns oracleTableColumns;            //<- The columns in the table we're inserting rows into
@@ -370,7 +372,7 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V>
             return sql;
         }        
         
-        abstract void configurePreparedStatement(oracle.jdbc.OraclePreparedStatement preparedStatement, List<SqoopRecord> userRecords) 
+        abstract void configurePreparedStatement(oracle.jdbc.OraclePreparedStatement preparedStatement, List<SqoopRecord> userRecords)
             throws SQLException;
             
         protected void configurePreparedStatementColumns(OraclePreparedStatement statement, Map<String, Object> fieldMap) 
@@ -497,7 +499,8 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V>
         }        
         
         @Override
-        public void write(K key, V value) throws InterruptedException, IOException {
+        public void write(K key, V value) throws InterruptedException,
+            IOException {
 
             try {
                 super.write(key, value);

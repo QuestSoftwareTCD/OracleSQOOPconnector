@@ -64,9 +64,9 @@ public class OraOopOutputFormatInsert<K extends SqoopRecord, V>
         
 
         // Create the Record Writer...
-        OraOopDBRecordWriterInsert result = null;
+        OraOopDBRecordWriterInsert<K,V> result = null;
         try {
-            result = new OraOopDBRecordWriterInsert(context
+            result = new OraOopDBRecordWriterInsert<K, V>(context
                                                    ,mapperId
                                                    ,insertMode
                                                    ,useAppendValuesOracleHint);
@@ -91,7 +91,7 @@ public class OraOopOutputFormatInsert<K extends SqoopRecord, V>
         return result;
     }
 
-    public class OraOopDBRecordWriterInsert extends OraOopDBRecordWriterBase {
+    public class OraOopDBRecordWriterInsert<K extends SqoopRecord, V> extends OraOopDBRecordWriterBase<K,V> {
 
         private String sqlStatement;                            //<- The SQL used when inserting batches of rows into the Oracle table
         private InsertMode insertMode;                          //<- The modus operandi of this class. i.e. Whether we insert into the Oracle table directly, or insert data into a separate table and then perform an EXCHANGE PARTITION statement.

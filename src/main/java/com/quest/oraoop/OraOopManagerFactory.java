@@ -79,9 +79,9 @@ public class OraOopManagerFactory extends ManagerFactory {
                 switch (jobType) {
 
                     case IMPORT: {
-                        if (isNumberOfImportMappersOkay(sqoopOptions) && 
-                            !isSqoopImportIncremental(jobData) && 
-                            isSqoopImportJobTableBased(sqoopOptions)) {
+                        if (isNumberOfImportMappersOkay(sqoopOptions) &&
+                            !isSqoopImportIncremental(jobData) &&
+                            isSqoopJobTableBased(sqoopOptions)) {
 
                             // At this stage, the Sqoop import job appears to be one we're
                             // interested in accepting. We now need to connect to
@@ -114,7 +114,8 @@ public class OraOopManagerFactory extends ManagerFactory {
                     }
 
                     case EXPORT:
-                        if (isNumberOfExportMappersOkay(sqoopOptions)) {
+                        if (isNumberOfExportMappersOkay(sqoopOptions) &&
+                            isSqoopJobTableBased(sqoopOptions)) {
 
                             // At this stage, the Sqoop export job appears to be one we're
                             // interested in accepting. We now need to connect to
@@ -514,11 +515,12 @@ public class OraOopManagerFactory extends ManagerFactory {
         return result;
     }
 
-    private boolean isSqoopImportJobTableBased(SqoopOptions sqoopOptions) {
+    private boolean isSqoopJobTableBased(SqoopOptions sqoopOptions) {
 
         String tableName = sqoopOptions.getTableName();
         return (tableName != null && !tableName.isEmpty());
     }
+
 
     private boolean isSqoopTableAnOracleTable(Connection connection, String connectionUserName, OracleTable tableContext) {
 

@@ -21,12 +21,16 @@
   <version>1.7.0-SNAPSHOT</version>
   
   <properties>
+    <internal.maven.repository>file:///tmp/internalmavenrepo</internal.maven.repository>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <hadoop.conf.dir>${env.HADOOP_CONF_DIR}</hadoop.conf.dir>
     <oracle.jdbc.url>jdbc:oracle:thin:@//localhost:1521/orcl</oracle.jdbc.url>
     <build.number>${env.BUILD_NUMBER}</build.number>
     <java.security.egd>file:///dev/urandom</java.security.egd>
+    <hadoop.version>1.1.2.21</hadoop.version>
+    <log4j.version>1.2.16</log4j.version>
+    <commons.logging.version>1.0.3</commons.logging.version>
   </properties>
 
   <scm>
@@ -52,8 +56,24 @@
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>ojdbc6</artifactId>
-      <version>[11.2,)</version>
+      <version>11.2</version>
     </dependency>
+
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-core</artifactId>
+        <version>${hadoop.version}</version>
+      </dependency>
+    <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>${log4j.version}</version>
+      </dependency>
+    <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>${commons.logging.version}</version>
+      </dependency>
   </dependencies>
 
   <build>
@@ -181,9 +201,31 @@
 
   <profiles>
     <profile>
-      <id>cdh3</id>
+      <id>hdp</id>
       <activation>
         <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <classifier>hdp</classifier>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.sqoop</groupId>
+          <artifactId>sqoop</artifactId>
+          <version>1.4.3-SNAPSHOT</version>
+          <exclusions>
+            <exclusion>
+              <groupId>commons-daemon</groupId>
+              <artifactId>commons-daemon</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>cdh3</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
       </activation>
       <properties>
         <classifier>cdh3</classifier>
@@ -217,6 +259,7 @@
     </profile>
   </profiles>
 
+  <!--
   <repositories>
     <repository>
       <id>cloudera</id>
@@ -237,4 +280,66 @@
       <url>${dist.snapshot.url}</url>
     </snapshotRepository>
   </distributionManagement>
+  -->
+  <distributionManagement>
+    <repository>
+      <id>internal.maven.repo</id>
+      <name>Internal Repository for Integration</name>
+      <url>${internal.maven.repository}</url>
+    </repository>
+  </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>internal.maven.repo</id>
+      <name>Internal Repository for Integration</name>
+      <url>${internal.maven.repository}</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>central</id>
+      <url>http://repo1.maven.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>Codehaus repository</id>
+      <url>http://repository.codehaus.org/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>apache.snapshots.repo</id>
+      <url>https://repository.apache.org/content/groups/snapshots</url>
+      <name>Apache Snapshots Repository</name>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>hortonworks.hdp.repo</id>
+      <url>http://s3.amazonaws.com/repo.hortonworks.com/release</url>
+      <!-- http://repo.hortonworks.com.s3-website-us-east-1.amazonaws.com/release -->
+      <name>Hortonworks HDP Repository</name>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>internal.maven.repo</id>
+      <name>Internal Repository for Integration</name>
+      <url>${internal.maven.repository}</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
 </project>

@@ -67,9 +67,9 @@ public class OraOopOutputFormatUpdate<K extends SqoopRecord, V>
             updateBatchSizeInConfigurationToAllowOracleAppendValuesHint(context);
         
         // Create the Record Writer...
-        OraOopDBRecordWriterUpdate result = null;
+        OraOopDBRecordWriterUpdate<K,V> result = null;
         try {
-            result = new OraOopDBRecordWriterUpdate(context
+            result = new OraOopDBRecordWriterUpdate<K, V>(context
                                                    ,mapperId
                                                    ,updateMode
                                                    ,useAppendValuesOracleHint);
@@ -94,7 +94,7 @@ public class OraOopOutputFormatUpdate<K extends SqoopRecord, V>
         return result;        
     }
     
-    public class OraOopDBRecordWriterUpdate extends OraOopDBRecordWriterBase {
+    public class OraOopDBRecordWriterUpdate<K extends SqoopRecord, V> extends OraOopDBRecordWriterBase<K,V> {
 
 
         private String sqlStatement;                //<- The SQL used when updating batches of rows into the Oracle table

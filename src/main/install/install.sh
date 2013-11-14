@@ -107,8 +107,10 @@ fi
 # make sure the Sqoop conf directory looks kosher 
 [ -d "${SQOOP_CONF_DIR}" ] || \
 	die "Sqoop configuration directory not found: ${SQOOP_CONF_DIR}"
-[ -f "${SQOOP_CONF_DIR}/sqoop-site-template.xml" ] || \
-	die "Sqoop configuration directory \"${SQOOP_CONF_DIR}\" must contain the file sqoop-site-template.xml."
+[ -f "${SQOOP_CONF_DIR}/sqoop-site-template.xml" \
+    -o -f "${SQOOP_CONF_DIR}/sqoop-site.xml" \
+    -o -f "${SQOOP_CONF_DIR}/sqoop-env.sh" ] || \
+	die "Sqoop configuration directory \"${SQOOP_CONF_DIR}\" must contain one of sqoop-site-template.xml, sqoop-site.xml or sqoop-env.sh"
 
 # ensure we have a managers.d file in the Sqoop conf directory
 MANAGER_DIR="${SQOOP_CONF_DIR}/managers.d"

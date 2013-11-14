@@ -17,10 +17,7 @@
 package com.quest.oraoop;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +69,8 @@ public class OraOopConnManager extends GenericJdbcManager {
     private Map<String, Integer>  columnTypesInOracleTable = null;
     private final String          timestampJavaType;
 
-    public OraOopConnManager(final SqoopOptions sqoopOptions) {
+
+  public OraOopConnManager(final SqoopOptions sqoopOptions) {
         super(OraOopConstants.ORACLE_JDBC_DRIVER_CLASS, sqoopOptions);
         if(this.options.getConf().getBoolean(OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING, OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING_DEFAULT)) {
           timestampJavaType = "String";
@@ -95,7 +93,10 @@ public class OraOopConnManager extends GenericJdbcManager {
                                                                               ,password
                                                                               ,additionalProps
                                                                               );
-        
+        if (username == null) {
+          username = getSessionUser(connection);
+        }
+        OraOopUtilities.setCurrentSessionUser(username);
         return connection;
     }
 
@@ -575,4 +576,42 @@ public class OraOopConnManager extends GenericJdbcManager {
                                   );
         LOG.fatal(msg, ex);
     }
+  public static String getSessionUser(Connection conn) {
+    Statement sessionStmt = null;
+    ResultSet results = null;
+    String user = null;
+    try {
+      sessionStmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+          ResultSet.CONCUR_READ_ONLY);
+      results = sessionStmt.executeQuery(OraOopConstants.QUERY_GET_SESSION_USER);
+
+      if (results.next()) {
+        user = results.getString(1);
+      }
+      conn.commit();
+    } catch (SQLException e) {
+      try {
+        conn.rollback();
+      } catch (SQLException ex) {
+        LOG.error("Failed to rollback transaction", ex);
+      }
+    } finally {
+      if (results != null) {
+        try {
+          results.close();
+        } catch (SQLException ex) {
+          LOG.error("Failed to close resultset", ex);
+        }
+      }
+      if (sessionStmt != null) {
+        try {
+          sessionStmt.close();
+        } catch (SQLException ex) {
+          LOG.error( "Failed to close statement", ex);
+        }
+      }
+    }
+    return user;
+  }
+
 }

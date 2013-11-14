@@ -273,6 +273,9 @@ public class OraOopConstants {
             ")" + " OR DATA_TYPE LIKE 'INTERVAL YEAR(%) TO MONTH'" + " OR DATA_TYPE LIKE 'INTERVAL DAY(%) TO SECOND(%)'" + " OR DATA_TYPE LIKE 'TIMESTAMP(%)'" + " OR DATA_TYPE LIKE 'TIMESTAMP(%) WITH TIME ZONE'"
             + " OR DATA_TYPE LIKE 'TIMESTAMP(%) WITH LOCAL TIME ZONE'" + ")";
 
+  // Query to get current logged on user
+  public static final String QUERY_GET_SESSION_USER = "SELECT USER FROM DUAL";
+
     // public static final int[] SUPPORTED_ORACLE_DATA_TYPES = {
     // oracle.jdbc.OracleTypes.BIT // -7;
     // ,oracle.jdbc.OracleTypes.TINYINT // -6;

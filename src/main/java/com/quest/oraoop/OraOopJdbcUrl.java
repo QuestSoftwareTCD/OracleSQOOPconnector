@@ -78,6 +78,7 @@ public class OraOopJdbcUrl {
 	    
 	    /*
 	     * The format of an Oracle jdbc URL is one of:
+	     *      jdbc:oracle:<driver-type>:@walletsvc - for wallet based login
 	     *      jdbc:oracle:<driver-type>:@<host>:<port>:<sid>
 	     *      jdbc:oracle:<driver-type>:@<host>:<port>/<service>
 	     *      jdbc:oracle:<driver-type>:@<host>:<port>/<service>?<parameters>
@@ -93,7 +94,7 @@ public class OraOopJdbcUrl {
 	        jdbcFragments[idx] = jdbcFragments[idx].trim();        
 	    
 	    // Check we can proceed...
-	    if (jdbcFragments.length < 5 || jdbcFragments.length > 6)
+	    if (jdbcFragments.length < 4 || jdbcFragments.length > 6)
 	        throw new JdbcOracleThinConnectionParsingError(String.format("There should be 5 or 6 colon-separated pieces of data in the JDBC URL, such as:\n"+ 
 	                                                                     "\tjdbc:oracle:<driver-type>:@<host>:<port>:<sid>\n"+ 
 	                                                                     "\tjdbc:oracle:<driver-type>:@<host>:<port>/<service>\n"+
@@ -127,7 +128,10 @@ public class OraOopJdbcUrl {
 	        throw new JdbcOracleThinConnectionParsingError("The fourth item in the colon-separated JDBC URL (the host name) must a prefixed with the \"@\" character.");
 	
 	    String portStr = "";
+      String wallet = "";
+
 	    switch(jdbcFragments.length) {
+
 	        case 6:
 	            // jdbc:oracle:<driver-type>:@<host>:<port>:<sid>
 	            portStr = jdbcFragments[4];
@@ -142,27 +146,33 @@ public class OraOopJdbcUrl {
 	            portStr = portAndService[0].trim();
 	            service = portAndService[1].trim();
 	            break;
+
+        case 4:
+            wallet = jdbcFragments[3];
+            break;
 	    }
-	    
-	    if (portStr.isEmpty())
-	        throw new JdbcOracleThinConnectionParsingError("The fifth item in the colon-separated JDBC URL (the port) must not be empty.");
-	
-	    try {
-	        port = Integer.parseInt(portStr);
-	    }
-	    catch (NumberFormatException ex) {
-	        throw new JdbcOracleThinConnectionParsingError(String.format("The fifth item in the colon-separated JDBC URL (the port) must be a valid number.\n"+ 
-	                                                                     "\"%s\" could not be parsed as an integer."
-	                                                                    ,portStr));
-	    }
-	
-	    if (port <= 0)
-	        throw new JdbcOracleThinConnectionParsingError(String.format("The fifth item in the colon-separated JDBC URL (the port) must be greater than zero.\n"+ 
-	                                                                     "\"%s\" was specified."
-	                                                                    ,portStr));        
-	    
-	    if(sid == null && service == null)
+
+      if (jdbcFragments.length > 4) {
+        if (portStr.isEmpty())
+            throw new JdbcOracleThinConnectionParsingError("The fifth item in the colon-separated JDBC URL (the port) must not be empty.");
+
+        try {
+            port = Integer.parseInt(portStr);
+        }
+        catch (NumberFormatException ex) {
+            throw new JdbcOracleThinConnectionParsingError(String.format("The fifth item in the colon-separated JDBC URL (the port) must be a valid number.\n"+
+                                                                         "\"%s\" could not be parsed as an integer."
+                                                                        ,portStr));
+        }
+
+        if (port <= 0)
+            throw new JdbcOracleThinConnectionParsingError(String.format("The fifth item in the colon-separated JDBC URL (the port) must be greater than zero.\n"+
+                                                                         "\"%s\" was specified."
+                                                                        ,portStr));
+      }
+	    if(sid == null && service == null && wallet == null)
 	        throw new JdbcOracleThinConnectionParsingError("The JDBC URL does not contain a SID or SERVICE. The URL should look like one of these:\n"+
+                                                          "\tjdbc:oracle:<driver-type>:@wallet_svc\n"+
 	                                                        "\tjdbc:oracle:<driver-type>:@<host>:<port>:<sid>\n"+ 
 	                                                        "\tjdbc:oracle:<driver-type>:@<host>:<port>/<service>\n"+
 	                                                        "\tjdbc:oracle:<driver-type>:@<host>:<port>/<service>?<parameters>\n"+
@@ -172,7 +182,8 @@ public class OraOopJdbcUrl {
 	    JdbcOracleThinConnection result = new JdbcOracleThinConnection(hostName.replaceFirst("^[@][/]{0,2}", "") // <- Remove the "@" prefix of the hostname
 	                                                                    , port
 	                                                                    , sid
-	                                                                    , service);
+	                                                                    ,service
+                                                                      ,wallet.replaceFirst("^[@][/]{0,2}", ""));
 
     	return result;
     }

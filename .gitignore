@@ -16,3 +16,7 @@
 .settings
 src/test/resources/oraoop-test-env.properties
 /target
+/out
+.idea
+.iml
+OracleSQOOPconnector.iml

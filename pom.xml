@@ -28,7 +28,9 @@
     <oracle.jdbc.url>jdbc:oracle:thin:@//localhost:1521/orcl</oracle.jdbc.url>
     <build.number>${env.BUILD_NUMBER}</build.number>
     <java.security.egd>file:///dev/urandom</java.security.egd>
-    <hadoop.version>1.1.2.21</hadoop.version>
+    <hadoop.1.version>1.2.0</hadoop.1.version>
+    <hadoop.2.version>2.2.0</hadoop.2.version>
+    <sqoop.version>1.4.3-SNAPSHOT</sqoop.version>
     <log4j.version>1.2.16</log4j.version>
     <commons.logging.version>1.0.3</commons.logging.version>
   </properties>
@@ -59,11 +61,6 @@
       <version>11.2</version>
     </dependency>
 
-      <dependency>
-        <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-core</artifactId>
-        <version>${hadoop.version}</version>
-      </dependency>
     <dependency>
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
@@ -200,10 +197,62 @@
   </build>
 
   <profiles>
+  <profile>
+      <id>hadoop200</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>hadoop.profile</name>
+          <value>200</value>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-common</artifactId>
+          <version>${hadoop.2.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-mapreduce-client-core</artifactId>
+          <version>${hadoop.2.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+          <version>${hadoop.2.version}</version>
+        </dependency>
+      </dependencies>
+
+    </profile>
+
+  <profile>
+      <id>hadoop100</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>hadoop.profile</name>
+          <value>100</value>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-core</artifactId>
+          <version>${hadoop.1.version}</version>
+        </dependency>
+      </dependencies>
+
+    </profile>
+
     <profile>
       <id>hdp</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <activeByDefault>false</activeByDefault>
       </activation>
       <properties>
         <classifier>hdp</classifier>
@@ -212,7 +261,7 @@
         <dependency>
           <groupId>org.apache.sqoop</groupId>
           <artifactId>sqoop</artifactId>
-          <version>1.4.3-SNAPSHOT</version>
+          <version>${sqoop.version}</version>
           <exclusions>
             <exclusion>
               <groupId>commons-daemon</groupId>
@@ -240,6 +289,9 @@
     </profile>
     <profile>
       <id>cdh4</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
       <properties>
         <classifier>cdh4</classifier>
       </properties>
@@ -259,16 +311,14 @@
     </profile>
   </profiles>
 
-  <!--
-  <repositories>
-    <repository>
-      <id>cloudera</id>
-      <name>libs-release</name>
-      <url>https://repository.cloudera.com/artifactory/repo</url>
-    </repository>
-  </repositories>
 
   <distributionManagement>
+    <repository>
+      <id>internal.maven.repo</id>
+      <name>Internal Repository for Integration</name>
+      <url>${internal.maven.repository}</url>
+    </repository>
+    <!--
     <repository>
       <id>quest-libs-release</id>
       <name>quest-libs-release</name>
@@ -279,14 +329,7 @@
       <name>quest-libs-snapshot</name>
       <url>${dist.snapshot.url}</url>
     </snapshotRepository>
-  </distributionManagement>
-  -->
-  <distributionManagement>
-    <repository>
-      <id>internal.maven.repo</id>
-      <name>Internal Repository for Integration</name>
-      <url>${internal.maven.repository}</url>
-    </repository>
+    -->
   </distributionManagement>
 
   <repositories>
@@ -323,11 +366,15 @@
     <repository>
       <id>hortonworks.hdp.repo</id>
       <url>http://s3.amazonaws.com/repo.hortonworks.com/release</url>
-      <!-- http://repo.hortonworks.com.s3-website-us-east-1.amazonaws.com/release -->
       <name>Hortonworks HDP Repository</name>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
+    </repository>
+    <repository>
+      <id>cloudera</id>
+      <name>libs-release</name>
+      <url>https://repository.cloudera.com/artifactory/repo</url>
     </repository>
   </repositories>
 

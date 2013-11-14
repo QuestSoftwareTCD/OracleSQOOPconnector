@@ -277,6 +277,7 @@ public class OraOopManagerFactory extends ManagerFactory {
         int jdbcPort = 0;
         String jdbcSid = "";
         String jdbcService = "";
+        String jdbcWallet = "";
         try {
             
             OraOopJdbcUrl oraOopJdbcUrl = new OraOopJdbcUrl(jdbcConnectStr);
@@ -285,6 +286,7 @@ public class OraOopManagerFactory extends ManagerFactory {
             jdbcPort = jdbcConnection.port;
             jdbcSid = jdbcConnection.sid;
             jdbcService = jdbcConnection.service;
+            jdbcWallet = jdbcConnection.wallet;
         }
         catch (JdbcOracleThinConnectionParsingError ex) {
             LOG.info(String.format("Unable to parse the JDBC connection URL \"%s\" as a connection "+ 
@@ -317,20 +319,22 @@ public class OraOopManagerFactory extends ManagerFactory {
                 generateJdbcConnectionUrlsByActiveInstance(activeInstances, jdbcPort, jobData);
         }
         else {
-            generateJdbcConnectionUrlsBySidOrService(jdbcHost, jdbcPort, jdbcSid, jdbcService, jobData);
+            generateJdbcConnectionUrlsByWalletSidOrService(jdbcHost, jdbcPort, jdbcSid, jdbcService, jdbcWallet, jobData);
         }
 
     }
 
-    private void generateJdbcConnectionUrlsBySidOrService(String hostName, int port, String sid, String serviceName, JobData jobData) {
+    private void generateJdbcConnectionUrlsByWalletSidOrService(String hostName, int port, String sid, String serviceName, String wallet, JobData jobData) {
 
         String jdbcUrl = null;
-        
-        if(sid != null && !sid.isEmpty())
-            jdbcUrl = OraOopUtilities.generateOracleSidJdbcUrl(hostName, port, sid);
-        else
-            jdbcUrl = OraOopUtilities.generateOracleServiceNameJdbcUrl(hostName, port, serviceName);
 
+        if (wallet != null && !wallet.isEmpty()) {
+          jdbcUrl = OraOopUtilities.generateOracleWalletJdbcUrl(wallet);
+        } else if (sid != null && !sid.isEmpty())  {
+            jdbcUrl = OraOopUtilities.generateOracleSidJdbcUrl(hostName, port, sid);
+        } else {
+            jdbcUrl = OraOopUtilities.generateOracleServiceNameJdbcUrl(hostName, port, serviceName);
+        }
         // Now store these connection strings in such a way that each mapper knows which one to use...
         for (int idxMapper = 0; idxMapper < jobData.getSqoopOptions().getNumMappers(); idxMapper++) {
             storeJdbcUrlForMapper(idxMapper, jdbcUrl, jobData);
@@ -375,7 +379,7 @@ public class OraOopManagerFactory extends ManagerFactory {
                     new OraOopUtilities.JdbcOracleThinConnection(activeInstance.hostName
                                                                 ,jdbcPort
                                                                 ,activeInstance.instanceName
-                                                                ,"");
+                                                                ,"","");
 
             if (testDynamicallyGeneratedOracleRacInstanceConnection(jdbcActiveInstanceThinConnection.toString()
                                                                    ,jobData.getSqoopOptions().getUsername()
@@ -455,6 +459,8 @@ public class OraOopManagerFactory extends ManagerFactory {
         // Now store these connection strings in such a way that each mapper knows which one to use...
         Configuration conf = jobData.getSqoopOptions().getConf();
         String mapperJdbcUrlPropertyName = OraOopUtilities.getMapperJdbcUrlPropertyName(mapperIdx, conf);
+        LOG.debug("Setting mapper url " + mapperJdbcUrlPropertyName + " = " +
+            jdbcUrl);
         conf.set(mapperJdbcUrlPropertyName, jdbcUrl);
     }
 
@@ -721,7 +727,14 @@ public class OraOopManagerFactory extends ManagerFactory {
         int numMappers = sqoopOptions.getNumMappers();
 
         String exportTableTemplate = conf.get(OraOopConstants.ORAOOP_EXPORT_CREATE_TABLE_TEMPLATE, "");
-        OracleTable templateTableContext = OraOopUtilities.decodeOracleTableName(sqoopOptions.getUsername(), exportTableTemplate);
+
+        String user = sqoopOptions.getUsername();
+
+        if (user == null) {
+           user = OraOopConnManager.getSessionUser(connection);
+        }
+
+        OracleTable templateTableContext = OraOopUtilities.decodeOracleTableName(user, exportTableTemplate);
 
         boolean noLoggingOnNewTable = conf.getBoolean(OraOopConstants.ORAOOP_EXPORT_CREATE_TABLE_NO_LOGGING, false);
         

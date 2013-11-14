@@ -73,7 +73,7 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V>
         String mapperJdbcUrlPropertyName = OraOopUtilities.getMapperJdbcUrlPropertyName(mapperId, conf);
         String mapperJdbcUrl = conf.get(mapperJdbcUrlPropertyName, null); // <- Get this mapper's JDBC URL
     
-        LOG.debug(String.format("Mapper %d has a JDBC URL of: %s"
+        LOG.info(String.format("Mapper %d has a JDBC URL of: %s"
                                ,mapperId
                                ,mapperJdbcUrl == null ? "<null>" : mapperJdbcUrl));
     
